@@ -295,8 +295,8 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
 		}
 	});
 	done.addClass("done");
-  if (complete === 1) {
-    done.prop("checked", true)
+  if (complete) {
+    done.prop("checked", true);
   }
 	doneBox.append(done);
 	newRow.append(doneBox);
@@ -305,7 +305,10 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
   const taskNameScreenReaderSpan = makeScreenReaderSpan();
   setText(taskNameScreenReaderSpan,"task name");
   const taskNameSpan = makeSpan();
-  setText(taskNameSpan,name)
+  setText(taskNameSpan,name);
+  if (complete) {
+    taskNameSpan.css("text-decoration", "line-through");
+  }
   nameBox.append(taskNameScreenReaderSpan);
   nameBox.append(taskNameSpan);
   newRow.append(nameBox);
@@ -344,7 +347,7 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
 	editButton.addClass("edittask");
 	editButtonBox.html(editButton);
 	newRow.append(editButtonBox);
-  // add the delete button
+  // add the delete button (or archive button for completed tasks)
   const deleteButtonBox = makeTableCell("removetask");
 	const deleteButton = $("<input></input>", {
 		type: "button",
@@ -355,8 +358,22 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
 			}
 		}
 	});
+  const archiveButton = $("<input></input>", {
+		type: "button",
+		value: "Archive",
+		on: {
+			click: function() {
+				archiveButtonHandler(this);
+			}
+		}
+	});
 	deleteButton.addClass("deletetask");
-	deleteButtonBox.html(deleteButton);
+  archiveButton.addClass("archivetask");
+  if (complete) {
+    deleteButtonBox.html(archiveButton);
+  } else {
+	  deleteButtonBox.html(deleteButton);
+  }
 	newRow.append(deleteButtonBox);
   // finally, stick the new row on the table
   table.append(newRow);
@@ -577,6 +594,14 @@ function doneHandler(obj) {
 		deleteButton.addClass("deletetask");
 		removeTaskBox.html(deleteButton);
 	}
+}
+
+function completeTask() {
+  // stuff goes here
+}
+
+function uncompleteTask() {
+  // stuff goes here
 }
 
 // -- USER SETTINGS
@@ -959,7 +984,7 @@ function addImportedTask(a) {
 	const homeSpoonList = homeTable.data("spoonList");
 	const displayMode = $("body").data("displayMode");
   const overallSpoon = reverseSpoon(parseInt(a[0]));
-  const done = a[1];
+  const done = parseInt(a[1]);
   const name = a[2];
   const spoonsRaw = a.slice(3,a.length);
   let spoonsProcessed = [];
