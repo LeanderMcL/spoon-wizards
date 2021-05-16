@@ -103,6 +103,7 @@ function buildTaskList() {
 	// create the task list
 	const taskList = makeTable();
 	taskList.attr("id","tasklist");
+  body.append(taskList);
 	// make the header row
 	const headerRow = makeTableRow();
 	headerRow.addClass("header");
@@ -191,8 +192,16 @@ function buildTaskList() {
 	newTaskRow.append(changeTaskBox);
 	// append new task row to table
 	taskList.append(newTaskRow);
-	// append the table to the page
-	body.append(taskList);
+	setSpoonWidths(taskList);
+}
+
+function setSpoonWidths(table) {
+  const kids = $(table.children());
+  const row = $(kids[0]);
+  const cells = $(row.children());
+  const spoons = cells.filter(".spoonhead");
+  const width = spoons.outerWidth();
+  spoons.outerWidth(width);
 }
 
 // -- ADDING TASKS --
