@@ -21,22 +21,25 @@
 
 $(document).ready(function() {
 	const body = $("body");
-	body.data("displayMode","text");
+  const taskData = initialiseTaskData();
+  // add basic data to the body of the page
+	body.data( { "displayMode": "text",
+             "tasks": taskData, 
+             "taskID": 0 });
+  // build the page
   buildSettings();
   buildTitle();
   buildOptions();
 	buildTaskList();
 	const table = $("#tasklist");
-	table.data("spoonList", spoonListEmoji);
+	table.data( { "spoonEmoji": spoonListEmoji,
+               "spoonTypes": spoonTypeList });
 	$(".savenewtask").click(function() {
 		saveNewTaskButtonHandler(this);
 	});
 	$("a.setting").click(function(){
 		changeSettingHandler(this);
 	});
-  /*addTask($("#tasklist"),"text","high","test task",
-          ["none","low","low","high","medium","low","none","low","none","none"],
-          spoonTypeList,spoonListEmoji);*/
 });
 
 // -- SETUP --
@@ -204,31 +207,49 @@ function setSpoonWidths(table) {
   spoons.outerWidth(width);
 }
 
+
 // -- ADDING TASKS --
+
+// TODO:
+// refactor addTask to use the data from taskData
+// delete all the repeated code from the button handler
 
 // respond to a click on the "add task" button
 function saveNewTaskButtonHandler(obj) {
 	// grab the table, spoon list, and display mode for passing on to addTask
 	const homeTable = $("#tasklist");
-	const homeSpoonList = homeTable.data("spoonList");
+	const homeEmojiList = homeTable.data("spoonEmoji");
+  const homeTypesList = homeTable.data("spoonTypes");
 	const displayMode = $("body").data("displayMode");
 	// grab the table row containing the button that just got clicked
 	const dad = $(obj).parent().parent();
+  const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
+  const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
+  // give a task ID
+  const data = $("body").data();
+  const taskID = data.taskID + 1;
+  data.taskID++;
+  // add the task object to our stored task data
+  const activeTasks = data.tasks.active;
+  activeTasks[taskID] = taskObject;
 	// list of the tds inside the tr
 	const kids = dad.children();
-	// add a new row to the table
 	// set an overall difficulty for the task
 	const spoon = kids.filter(".spoon");
 	let spoonValList = [];
 	let i;
 	for (i = 0; i < spoon.length; i++) {
 		let spoonForm = $(spoon[i]).children();
+    let spoonType = $(spoonForm[1]).attr("class");
 		let spoonVal = $(spoonForm[1]).val();
+    let spoonData = { spoonType: parseSpoon(spoonVal)};
+    //todo: push a list of [spoonType, parseSpoon(spoonVal)] instead of just the value
+    //then make add task not fall over
+    // but this is for the new function
 		spoonValList.push(parseSpoon(spoonVal));
 	}
 	const spoonTotal = sumList(spoonValList);
 	const spoonCost = parseSpoonCost(spoonTotal,spoonValList);
-	let spoonCostSpan;
 	// add the task name
 	const taskNameBox = $(kids[2]);
 	const grandkids = taskNameBox.children();
@@ -249,11 +270,13 @@ function saveNewTaskButtonHandler(obj) {
     spoonCosts.push(spoonVal);
 		let spoonDad = spoonForm.parent();
 	}
+  // build the spoon data
+  // doesn't quite work because the data format is wrong
   // clear the new task row
   clearNewTaskRow(dad);
 	// put our newly generated row into the table
   // add our new task to the table
-  addTask(homeTable,displayMode,spoonCost,taskName,spoonCosts,spoonTypeList,homeSpoonList);
+  addTask(homeTable,displayMode,taskObject,homeTypesList,homeEmojiList);
 };
 
 // clear the new task row
@@ -273,7 +296,9 @@ function clearNewTaskRow(obj) {
 }
 
 // add a new task to the tasklist table
-function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEmojis,complete=0) {
+// it would be nice to take a task data object rather than invidual parameters
+// that's another refactor task
+function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
   // create a new row
   const newRow = makeTableRow("task");
   // overall task difficulty
@@ -282,11 +307,11 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
   let spoonCostSpan;
   if (displayMode == "text") {
     spoonCostSpan = makeSpan();
-    setText(spoonCostSpan,difficulty);
-    let difficultyBGColour = setSpoonColour(difficulty);
+    setText(spoonCostSpan,reverseSpoon(task.difficulty));
+    let difficultyBGColour = setSpoonColour(reverseSpoon(task.difficulty));
     difficultyBox.css("background-color", difficultyBGColour);
   } else if (displayMode == "emoji") {
-    spoonCostSpan = trafficLightSpan(difficulty,spoonEmojis);
+    spoonCostSpan = trafficLightSpan(task.difficulty,spoonEmojis);
   }
   difficultyBox.append(difficultyScreenReaderSpan);
   difficultyBox.append(spoonCostSpan);
@@ -304,7 +329,7 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
 		}
 	});
 	done.addClass("done");
-  if (complete) {
+  if (task.done) {
     done.prop("checked", true);
   }
 	doneBox.append(done);
@@ -315,21 +340,20 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
   setText(taskNameScreenReaderSpan,"task name");
   const taskNameSpan = makeSpan();
   taskNameSpan.addClass("taskname");
-  setText(taskNameSpan,name);
-  if (complete) {
+  setText(taskNameSpan,task.name);
+  if (task.done) {
     nameBox.addClass("completed");
   }
   nameBox.append(taskNameScreenReaderSpan);
   nameBox.append(taskNameSpan);
   newRow.append(nameBox);
   // spoon counts
-  let i;
-  for (i = 0; i < spoonCosts.length; i++) {
+  for (let i = 0; i < spoonTypes.length; i++) {
     let spoonBox = makeTableCell("spoon");
     let spoonType = spoonTypes[i];
     spoonBox.addClass(spoonType);
     let spoonScreenReaderSpan = makeScreenReaderSpan(spoonType);
-    let spoonVal = spoonCosts[i];
+    let spoonVal = reverseSpoon(task.spoons[spoonType]);
     let spoonSpan;
     if (displayMode == "text") {
       spoonSpan = makeSpan();
@@ -379,7 +403,7 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
 	});
 	deleteButton.addClass("deletetask");
   archiveButton.addClass("archivetask");
-  if (complete) {
+  if (task.done) {
     deleteButtonBox.html(archiveButton);
   } else {
 	  deleteButtonBox.html(deleteButton);
@@ -806,42 +830,10 @@ function changeSettingHandler(obj) {
 	}
 }
 
-// -- USER DATA --
-
-/* notes to self
-
-I want a CSV string for each task that looks as follows:
-overall difficulty: 0-4
-done: 0 or 1 (for no or yes)
-task name
-one value of 0-4 for each spoon type
-that's it
-
-so: examples
-3,0,call doctor,0,1,2,0,2,2,1,2,0,0
-1,1,order meds,0,1,0,0,1,0,1,0,0,0
-
-right, we're going to start with two buttons, one that imports data, one that exports data
-*/
+// -- IMPORT AND EXPORT
 
 /*
-
-okay how do we import data? let's first take a task and try importing it
-
-*/
-
-/*
-
-okay we now have data validation. to be done:
-* deal with placement of the import and export boxes better - I think I want them next to each other,
-in predictable places, and with a label
 * maybe add in a "You have no tasks!" if the exporter can't find any tasks to export
-* grab the data from the import box
-* split the data up by \n, the rest is working great
-* convert the data back into information the code can use
-* slightly modifidy addTask - specifically to take an optional done? value and tick the box/strike out
-the task name if necessary
-* run each validated task through Add task to put it on the list
 * add in an error message that says X tasks cannot be validated, with a Close button
 
 */
@@ -996,17 +988,19 @@ function addImportedTaskList(a) {
 
 function addImportedTask(a) {
   const homeTable = $("#tasklist");
-	const homeSpoonList = homeTable.data("spoonList");
+  const homeSpoonTypes = homeTable.data("spoonTypes");
+	const homeSpoonEmoji = homeTable.data("spoonEmoji");
 	const displayMode = $("body").data("displayMode");
-  const overallSpoon = reverseSpoon(parseInt(a[0]));
+  const overallSpoon = parseInt(a[0]);
   const done = parseInt(a[1]);
   const name = a[2];
   const spoonsRaw = a.slice(3,a.length);
   let spoonsProcessed = [];
   for (let i = 0; i < spoonsRaw.length; i++) {
-    spoonsProcessed.push(reverseSpoon(parseInt(spoonsRaw[i])));
+    spoonsProcessed.push([homeSpoonTypes[i], reverseSpoon(parseInt(spoonsRaw[i]))]);
   }
-  addTask(homeTable,displayMode,overallSpoon,name,spoonsProcessed,spoonTypeList,homeSpoonList,done)
+  const taskObject = buildTaskData(overallSpoon, done, name, spoonsProcessed);
+  addTask(homeTable,displayMode,taskObject,homeSpoonTypes,homeSpoonEmoji)
 }
 
 function makeExportInstructions() {
@@ -1029,6 +1023,73 @@ function makeImportInstructions() {
                        "3. Press the submit button");
   instructionsDiv.append(instructionsSpan);
   return instructionsDiv;
+}
+
+
+// -- USER DATA --
+
+// create the basic object structure for task data
+function initialiseTaskData() {
+  const taskData = { active: { }, archive: { } };
+  return taskData;
+}
+
+function buildTaskData(difficulty, done, name, spoons) {
+  const taskData = { };
+  taskData.name = name;
+  taskData.difficulty = difficulty;
+  taskData.done = done;
+  taskData.spoons = buildSpoonData(spoons);
+  return taskData;
+}
+
+function buildSpoonData(a) {
+  let spoonData = { };
+  for (let i = 0; i < a.length; i++)
+    {
+      let spoonType = a[i][0];
+      let spoonVal = a[i][1];
+      spoonData[spoonType] = parseSpoon(spoonVal);
+    }
+  return spoonData;
+}
+
+function getNewTaskData(row) {
+  const kids = row.children();
+  // set an overall difficulty for the task
+	const spoon = kids.filter(".spoon");
+	let spoonValList = [];
+	let i;
+	for (i = 0; i < spoon.length; i++) {
+		let spoonForm = $(spoon[i]).children();
+		let spoonVal = $(spoonForm[1]).val();
+		spoonValList.push(parseSpoon(spoonVal));
+	}
+	const spoonTotal = sumList(spoonValList);
+	const spoonCost = parseSpoonCost(spoonTotal,spoonValList);
+	let spoonCostSpan;
+	// add the task name
+	const taskNameBox = $(kids[2]);
+	const grandkids = taskNameBox.children();
+	const taskNameInput = $(grandkids[1]);
+	const taskName = taskNameInput.val();
+	// spoon counts
+	let j;
+  let spoonCosts = [];
+	for (j = 0; j < spoon.length; j++) {
+		let newSpoonBox = makeTableCell();
+		let spoonForm = $(spoon[j]).children();
+    let spoonType = $(spoonForm[1]).attr("class");
+		let spoonVal;
+		if ($(spoonForm[1]).val() == "blank") {
+			spoonVal = "none";
+		} else {
+			spoonVal = $(spoonForm[1]).val();
+		}
+    spoonCosts.push([spoonType, spoonVal]);
+		let spoonDad = spoonForm.parent();
+	}
+  return [spoonTotal,0,taskName,spoonCosts];
 }
 
 function getExportData() {
