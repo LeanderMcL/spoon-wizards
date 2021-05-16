@@ -566,6 +566,7 @@ function doneHandler(obj) {
 	if (amIChecked) { // checkbox is checked
     completeTask(dad);
 	} else { // it's not
+    uncompleteTask(dad);
 		// take the cross out away
 		taskNameBox.css("text-decoration", "none");
 		// change "archive" back to "delete"
@@ -605,8 +606,26 @@ function completeTask(row) {
 	removeTaskBox.html(archiveButton);
 }
 
-function uncompleteTask() {
-  // stuff goes here
+function uncompleteTask(row) {
+  // grab the specific parts of the row I need
+  // again - look into multiple assignment to see if I can shorten this code
+  const kids = row.children();
+  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const removeTaskBox = $(kids.filter(".removetask"));
+  // remove line-through from the task name
+  taskNameBox.css("text-decoration", "none");
+  // change "archive" to "delete"
+	const deleteButton = $("<input></input>", {
+		type: "button",
+		value: "Delete",
+		on: {
+			click: function() {
+				deleteButtonHandler(this);
+			}
+		}
+	});
+	deleteButton.addClass("deletetask");
+	removeTaskBox.html(deleteButton);
 }
 
 // -- USER SETTINGS
