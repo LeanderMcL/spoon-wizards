@@ -1307,30 +1307,33 @@ function setSpoonColour(val) {
 	}
 }
 
-// creates a div that behaves like a table row
+// crates a table header
+function makeTableHead() {
+  const th = $("<th></th>");
+  return th;
+}
+
+// creates a table row
 function makeTableRow(val = "") {
-	const tr = $("<div></div>");
-	tr.addClass("table-row");
+	const tr = $("<tr></tr>");
   if (val) {
     tr.addClass(val);
   }
 	return tr;
 }
 
-// creates a div that behaves like a table cell
+// creates a table cell
 function makeTableCell(val = "") {
-	const td = $("<div></div>");
-	td.addClass("table-cell");
+	const td = $("<td></td>");
   if (val) {
     td.addClass(val);
   }
 	return td;
 }
 
-// creates a div that behaves like a table
+// creates a table
 function makeTable() {
-	const table = $("<div></div>");
-	table.addClass("table");
+	const table = $("<table></table>");
 	return table;
 }
 
