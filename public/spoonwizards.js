@@ -564,21 +564,9 @@ function doneHandler(obj) {
 	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
 	const removeTaskBox = $(kids.filter(".removetask")[0]);
 	if (amIChecked) { // checkbox is checked
-		// cross out the task name
-		taskNameBox.css("text-decoration", "line-through");
-		// change "delete" to "archive"
-		const archiveButton = $("<input></input>", {
-			type: "button",
-			value: "Archive",
-			on: {
-				click: function() {
-					archiveButtonHandler(this);
-				}
-			}
-		});
-		archiveButton.addClass("archivetask");
-		removeTaskBox.html(archiveButton);
+    completeTask(dad);
 	} else { // it's not
+    uncompleteTask(dad);
 		// take the cross out away
 		taskNameBox.css("text-decoration", "none");
 		// change "archive" back to "delete"
@@ -596,12 +584,48 @@ function doneHandler(obj) {
 	}
 }
 
-function completeTask() {
-  // stuff goes here
+function completeTask(row) {
+  // grab the specific parts of the row I need
+  // could this be shortened and still be decently readable?
+  const kids = row.children();
+  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const removeTaskBox = $(kids.filter(".removetask"));
+  // cross out the task name
+  taskNameBox.css("text-decoration", "line-through");
+  // change "delete to archive"
+  const archiveButton = $("<input></input>", {
+		type: "button",
+		value: "Archive",
+		on: {
+			click: function() {
+				archiveButtonHandler(this);
+			}
+		}
+	});
+	archiveButton.addClass("archivetask");
+	removeTaskBox.html(archiveButton);
 }
 
-function uncompleteTask() {
-  // stuff goes here
+function uncompleteTask(row) {
+  // grab the specific parts of the row I need
+  // again - look into multiple assignment to see if I can shorten this code
+  const kids = row.children();
+  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const removeTaskBox = $(kids.filter(".removetask"));
+  // remove line-through from the task name
+  taskNameBox.css("text-decoration", "none");
+  // change "archive" to "delete"
+	const deleteButton = $("<input></input>", {
+		type: "button",
+		value: "Delete",
+		on: {
+			click: function() {
+				deleteButtonHandler(this);
+			}
+		}
+	});
+	deleteButton.addClass("deletetask");
+	removeTaskBox.html(deleteButton);
 }
 
 // -- USER SETTINGS
