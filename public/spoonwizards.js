@@ -305,9 +305,10 @@ function addTask(table,displayMode,difficulty,name,spoonCosts,spoonTypes,spoonEm
   const taskNameScreenReaderSpan = makeScreenReaderSpan();
   setText(taskNameScreenReaderSpan,"task name");
   const taskNameSpan = makeSpan();
+  taskNameSpan.addClass("taskname");
   setText(taskNameSpan,name);
   if (complete) {
-    taskNameSpan.css("text-decoration", "line-through");
+    nameBox.addClass("completed");
   }
   nameBox.append(taskNameScreenReaderSpan);
   nameBox.append(taskNameSpan);
@@ -567,21 +568,7 @@ function doneHandler(obj) {
     completeTask(dad);
 	} else { // it's not
     uncompleteTask(dad);
-		// take the cross out away
-		taskNameBox.css("text-decoration", "none");
-		// change "archive" back to "delete"
-		const deleteButton = $("<input></input>", {
-			type: "button",
-			value: "Delete",
-			on: {
-				click: function() {
-					deleteButtonHandler(this);
-				}
-			}
-		});
-		deleteButton.addClass("deletetask");
-		removeTaskBox.html(deleteButton);
-	}
+  }
 }
 
 function completeTask(row) {
@@ -590,8 +577,9 @@ function completeTask(row) {
   const kids = row.children();
   const taskNameBox = $(kids.filter(".tasknamebox"));
   const removeTaskBox = $(kids.filter(".removetask"));
-  // cross out the task name
-  taskNameBox.css("text-decoration", "line-through");
+  // add "completed" class
+  // this adds a strikethrough
+  taskNameBox.addClass("completed");
   // change "delete to archive"
   const archiveButton = $("<input></input>", {
 		type: "button",
@@ -612,8 +600,9 @@ function uncompleteTask(row) {
   const kids = row.children();
   const taskNameBox = $(kids.filter(".tasknamebox"));
   const removeTaskBox = $(kids.filter(".removetask"));
-  // remove line-through from the task name
-  taskNameBox.css("text-decoration", "none");
+  // remove "completed" class
+  // removes the strikethrough
+  taskNameBox.removeClass("completed");
   // change "archive" to "delete"
 	const deleteButton = $("<input></input>", {
 		type: "button",
@@ -648,7 +637,6 @@ function changeSettingHandler(obj) {
 	const tableRows = $("#tasklist").children();
 	const taskRows = tableRows.filter(".task");
 	if (newMode == "text") { // switch to text mode
-    console.log("testing changing mode to text");
 		// change the difficulty header
 		difficultyHeader.html("difficulty");
 		// change the done? header
@@ -673,20 +661,15 @@ function changeSettingHandler(obj) {
 			let difficultyScreenReaderSpan = $(difficultyBox.children()[0]);
 			let difficultySpan = $(difficultyBox.children()[1]);
 			let difficultyName = difficultySpan.attr("title");
-      console.log(difficultyName);
 			let newDifficultySpan = makeSpan();
       setText(newDifficultySpan,difficultyName);
-      console.log(newDifficultySpan);
-      console.log(newDifficultySpan.html());
 			difficultyBox.html(difficultyScreenReaderSpan);
 			difficultyBox.append(newDifficultySpan);
 			let spoonColour = setSpoonColour(difficultyName);
 			difficultyBox.css("background-color", spoonColour);
-      console.log(difficultyBox.html());
 			// convert each invididual spoon to text
 			let spoon = rowKids.filter(".spoon");
 			let k;
-      console.log("difficultyBox html", difficultyBox.html());
 			for (k = 0; k < spoon.length; k++) {
 				let spoonBox = $(spoon[k]);
 				let spoonSpan = $(spoonBox.children()[1]);
@@ -698,7 +681,6 @@ function changeSettingHandler(obj) {
 				let spoonColour = setSpoonColour(spoonName);
 				spoonBox.css("background-color", spoonColour);
 			}
-      console.log(difficultyBox.html());
 		}
 		// switch our links around
 		const emojiLink = $("<a></a>", {
