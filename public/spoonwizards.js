@@ -109,7 +109,7 @@ function buildTaskList() {
 	headerRow.addClass("header");
 	headerRow.attr("id","taskhead");
 	// add the difficulty header
-	const difficultyHead = makeTableRow();
+	const difficultyHead = makeTableHead();
 	difficultyHead.addClass("difficultyhead");
 	difficultyHead.html("difficulty");
 	headerRow.append(difficultyHead);
