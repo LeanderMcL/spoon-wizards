@@ -108,24 +108,24 @@ function buildTaskList() {
 	headerRow.addClass("header");
 	headerRow.attr("id","taskhead");
 	// add the difficulty header
-	const difficultyHead = makeTableCell();
+	const difficultyHead = makeTableHead();
 	difficultyHead.addClass("difficultyhead");
 	difficultyHead.html("difficulty");
 	headerRow.append(difficultyHead);
 	// add the done header
-	const doneHead = makeTableCell();
+	const doneHead = makeTableHead();
 	doneHead.addClass("donehead");
 	doneHead.html("done?");
 	headerRow.append(doneHead);
 	// add the task name header
-	const nameHead = makeTableCell();
+	const nameHead = makeTableHead();
 	nameHead.addClass("namehead");
 	nameHead.html("task");
 	headerRow.append(nameHead);
 	// add the spoon name headers
 	let i;
 	for (i = 0; i < spoonTypeList.length; i++) {
-		let spoonHead = makeTableCell();
+		let spoonHead = makeTableHead();
 		spoonHead.addClass("spoonhead");
 		spoonHead.addClass(spoonTypeList[i]);
 		let spoonName;
