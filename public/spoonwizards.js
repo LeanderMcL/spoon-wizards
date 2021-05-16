@@ -678,7 +678,7 @@ function changeSettingHandler(obj) {
 		let i;
 		for (i = 0; i < spoonHeaders.length; i++) {
 			let thisSpoon = spoonHeaders[i];
-			let spoonType = thisSpoon.classList[2];
+			let spoonType = thisSpoon.classList[1];
 			if (spoonType == "executive-function") {
 				spoonType = "executive function";
 			}
