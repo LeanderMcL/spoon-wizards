@@ -25,15 +25,15 @@ $(document).ready(function() {
   // add basic data to the body of the page
 	body.data( { "displayMode": "text",
              "tasks": taskData, 
-             "taskID": 0 });
+             "taskID": 0, 
+             "spoonEmoji": spoonListEmoji,
+             "spoonTypes": spoonTypeList } );
   // build the page
   buildSettings();
   buildTitle();
   buildOptions();
 	buildTaskList();
 	const table = $("#tasklist");
-	table.data( { "spoonEmoji": spoonListEmoji,
-               "spoonTypes": spoonTypeList });
 	$(".savenewtask").click(function() {
 		saveNewTaskButtonHandler(this);
 	});
@@ -219,8 +219,8 @@ function setSpoonWidths(table) {
 function saveNewTaskButtonHandler(obj) {
 	// grab the table, spoon list, and display mode for passing on to addTask
 	const homeTable = $("#tasklist");
-	const homeEmojiList = homeTable.data("spoonEmoji");
-  const homeTypesList = homeTable.data("spoonTypes");
+	const homeEmojiList = $("body").data("spoonEmoji");
+  const homeTypesList = $("body").data("spoonTypes");
 	const displayMode = $("body").data("displayMode");
 	// grab the table row containing the button that just got clicked
 	const dad = $(obj).parent().parent();
@@ -450,25 +450,27 @@ function saveEditedTaskButtonHandler(obj) {
 	// reinstate the edit button
 	const displayMode = $("body").data("displayMode");
 	const homeTable = $("#tasklist");
-	const homeSpoonList = homeTable.data("spoonList");
+	const homeSpoonList = $("body").data("spoonTypes");
+  const homeSpoonEmoji = $("body").data("spoonEmoji");
 	const dad = $(obj).parent().parent();
 	const kids = dad.children();
-	// recalculate the overall task difficulty
-	const difficultyBox = $(kids.filter(".difficultybox")[0]);
+  const taskData = getNewTaskData(dad);
+  const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
+  updateTask(dad,displayMode,taskObject,homeSpoonList,homeSpoonEmoji);
+}
+
+// updates an edited task
+// TBD: most of this
+// TBD: update the edited tasks in the DOM, reliant on bug #37
+function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
+  const kids = row.children();
+  // update the overall difficulty
+  const difficultyBox = $(kids.filter(".difficultybox")[0]);
   const difficultySpan = $(difficultyBox.children()[1]);
-	const spoon = kids.filter(".spoon");
-	let spoonValList = [];
-	let i;
-	for (i = 0; i < spoon.length; i++) {
-		let spoonForm = $(spoon[i]).children();
-		let spoonVal = $(spoonForm[1]).val();
-		spoonValList.push(parseSpoon(spoonVal));
-	}
-	const spoonTotal = sumList(spoonValList);
-	const spoonCost = parseSpoonCost(spoonTotal,spoonValList);
   let spoonCostSpan;
-	if (displayMode == "emoji") {
-		spoonCostSpan = trafficLightSpan(spoonCost,homeSpoonList);
+  const spoonCost = reverseSpoon(task.difficulty);
+  if (displayMode == "emoji") {
+		spoonCostSpan = trafficLightSpan(spoonCost,spoonEmojis);
 	} else if (displayMode == "text") {
 		const bgColour = setSpoonColour(spoonCost);
     spoonCostSpan = makeSpan();
@@ -477,41 +479,37 @@ function saveEditedTaskButtonHandler(obj) {
 	}
   difficultySpan.remove();
   difficultyBox.append(spoonCostSpan);
-	// grab the task name and render in plain text
-	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
+  // update the task name
+  const taskNameBox = $(kids.filter(".tasknamebox")[0]);
 	const taskNameInput = $(taskNameBox.children()[1]);
-	const taskName = taskNameInput.val();
+	const taskName = task.name;
 	const taskNameSpan = makeSpan();
   setText(taskNameSpan,taskName)
 	taskNameInput.remove();
 	taskNameBox.append(taskNameSpan);
-	// spoon counts
-	let j;
-	for (j = 0; j < spoon.length; j++) {
-		let spoonBox = $(spoon[j]);
-		let spoonForm = $(spoon[j]).children();
-		let spoonVal;
-		let spoonSpan = $(spoonForm[1]);
-		if (spoonSpan.val() == "blank") {
-			spoonVal = "none";
-		} else {
-			spoonVal = spoonSpan.val();
-		}
-		let spoonDad = spoonForm.parent();
-		let newSpoonSpan;
-		if (displayMode == "emoji") {
-			newSpoonSpan = trafficLightSpan(spoonVal,homeSpoonList);
+  // update spoon counts
+  const spoon = kids.filter(".spoon");
+  const taskSpoons = task.spoons
+  for (let i = 0; i < spoonTypes.length; i++) {
+    let spoonBox = $(spoon.filter("." + spoonTypes[i])[0]);
+    let spoonForm = spoonBox.children();
+    let spoonSpan = $(spoonForm[1]);
+    let newSpoonSpan;
+    let spoonVal = reverseSpoon(taskSpoons[spoonTypes[i]]);
+    // TBD here: convert the numbers to their appropriate values when in the code below
+    if (displayMode == "emoji") {
+			newSpoonSpan = trafficLightSpan(spoonVal,spoonTypes);
 		} else if (displayMode == "text") {
 			let spoonBGColour = setSpoonColour(spoonVal);
 			newSpoonSpan = makeSpan();
       setText(newSpoonSpan,spoonVal);
 			spoonBox.css("background-color",spoonBGColour);
 		}
-		spoonSpan.remove();
-		spoonBox.append(newSpoonSpan);
-	}
-	// reinstate the edit button
-	const editButtonBox = $(kids.filter(".changetask")[0]);
+    spoonSpan.remove();
+    spoonBox.append(newSpoonSpan);
+  }
+  // reinstate the edit button
+  const editButtonBox = $(kids.filter(".changetask")[0]);
 	const editButton = $("<input></input>", {
 		type: "button",
 		value: "Edit",
@@ -940,8 +938,8 @@ function addImportedTaskList(a) {
 
 function addImportedTask(a) {
   const homeTable = $("#tasklist");
-  const homeSpoonTypes = homeTable.data("spoonTypes");
-	const homeSpoonEmoji = homeTable.data("spoonEmoji");
+  const homeSpoonTypes = $("body").data("spoonTypes");
+	const homeSpoonEmoji = $("body").data("spoonEmoji");
 	const displayMode = $("body").data("displayMode");
   const overallSpoon = parseInt(a[0]);
   const done = parseInt(a[1]);
@@ -1032,7 +1030,20 @@ function getNewTaskData(row) {
 	const spoonTotal = sumList(spoonValList);
 	const spoonCost = parseSpoon((parseSpoonCost(spoonTotal,spoonValList)));
 	let spoonCostSpan;
-	// add the task name
+	// if this is an edited task, check if the task is completed
+  const doneBox = $(kids[1]);
+  let done;
+  if ($(doneBox).children().length != 0) { // we're editing a row, and there's a checkbox to test
+    let doneCheck = $($(doneBox).children()[1]).prop("checked");
+    if (doneCheck) {
+      done = 1;
+    } else {
+      done = 0;
+    }
+  } else {
+    done = 0;
+  }
+  // add the task name
 	const taskNameBox = $(kids[2]);
 	const grandkids = taskNameBox.children();
 	const taskNameInput = $(grandkids[1]);
@@ -1053,7 +1064,7 @@ function getNewTaskData(row) {
     spoonCosts.push([spoonType, spoonVal]);
 		let spoonDad = spoonForm.parent();
 	}
-  return [spoonCost,0,taskName,spoonCosts];
+  return [spoonCost,done,taskName,spoonCosts];
 }
 
 function getExportData() {
