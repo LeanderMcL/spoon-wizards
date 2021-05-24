@@ -987,7 +987,7 @@ function importSubmitHandler(obj) {
   const importArea = $("#import-area");
   addImportedTaskList(valid[0]);
   if (valid[1].length > 0) {
-    const errorString = buildImportErrorString(valid[1]);
+    const errorString = buildImportErrorString(valid[1].length);
     error(errorString,importDiv);
     importArea.val(buildErrorImportVal(valid[1]));
   } else {
@@ -1286,14 +1286,10 @@ function errorOkHandler(obj) {
   div.remove();
 }
 
-function buildImportErrorString(l) {
-  let x = l.length;
+function buildImportErrorString(x) {
   let s;
-  let task = x > 1? "tasks" : "task";
-  s = "The following " + x.toString() + " " + task + " could not be imported:<br>";
-  for (let i = 0; i < l.length; i++) {
-    s += l[i][2] + "<br>";
-  }
+  let task = x > 1? x.toString() + " tasks" : "task";
+  s = "The " + task + " above could not be imported.";
   return s;
 }
 
