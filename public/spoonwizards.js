@@ -94,6 +94,7 @@ function buildOptions() {
   para.attr("id","options-para");
   container.addClass("options");
   container.addClass("container");
+  container.attr("id","options-container");
   container.append(importButton);
   container.append(exportButton);
   // still need to make these buttons do anything at all, so I guess we'll start with the Export button
@@ -840,7 +841,14 @@ function changeSettingHandler(obj) {
 
 function exportTasksHandler(obj) {
   const taskData = getExportData();
-  exportBox(taskData);
+  const para = $("#options-para");
+  if (taskData) {
+    exportBox(taskData);
+  }
+  else {
+    error("You have no tasks!",para);
+  }
+  //exportBox(taskData);
   };
 
 function importTasksHandler(obj) {
@@ -1235,6 +1243,26 @@ function validateDone(done) {
   } else {
     return false;
   }
+}
+
+// ERROR GENERATOR
+
+function error(s,obj) {
+  const div = $("<div></div>");
+  div.addClass("error");
+  setText(div,s);
+  const button = makeButton("OK");
+  button.click(function() {
+    errorOkHandler(this);
+  });
+  div.append(" ");
+  div.append(button);
+  obj.append(div);
+}
+
+function errorOkHandler(obj) {
+  const div = $(obj).parent();
+  div.remove();
 }
 
 // -- HELPER FUNCTIONS
