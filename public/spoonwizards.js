@@ -848,7 +848,7 @@ function exportTasksHandler(obj) {
   else {
     error("You have no tasks!",para);
   }
-  //exportBox(taskData);
+  exportBox(taskData);
   };
 
 function importTasksHandler(obj) {
@@ -981,22 +981,25 @@ function importInstructionsHandler(obj) {
 
 function importSubmitHandler(obj) {
   const data = getImportData();
-  const dataList = importTaskList(data);
-  const valid = validateTaskList(dataList);
   const importDiv = $("#import-div");
-  const importArea = $("#import-area");
-  addImportedTaskList(valid[0]);
-  if (valid[1].length > 0) {
-    const errorString = buildImportErrorString(valid[1].length);
-    error(errorString,importDiv);
-    importArea.val(buildErrorImportVal(valid[1]));
-  } else {
-    importArea.val("");
-    if ($("#error").length != 0) {
-      $("#error").remove();
+  if (data) {
+    const dataList = importTaskList(data);
+    const valid = validateTaskList(dataList);
+    const importArea = $("#import-area");
+    addImportedTaskList(valid[0]);
+    if (valid[1].length > 0) {
+      const errorString = buildImportErrorString(valid[1].length);
+      error(errorString,importDiv);
+      importArea.val(buildErrorImportVal(valid[1]));
+    } else {
+      importArea.val("");
+      if ($("#error").length != 0) {
+        $("#error").remove();
+      }
     }
+  } else {
+    error("You haven't added any tasks!",importDiv);
   }
-  
 }
 
 function addImportedTaskList(a) {
@@ -1275,7 +1278,6 @@ function error(s,obj) {
     obj.append(div);
   }
   else {
-    console.log("refresh");
     let errorTextSpan = $("#error-text");
     setHTML(errorTextSpan,s);
   }
