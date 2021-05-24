@@ -234,45 +234,6 @@ function saveNewTaskButtonHandler(obj) {
   const activeTasks = data.tasks.active;
   activeTasks[taskID] = taskObject;
 	// list of the tds inside the tr
-	const kids = dad.children();
-	// set an overall difficulty for the task
-	const spoon = kids.filter(".spoon");
-	let spoonValList = [];
-	let i;
-	for (i = 0; i < spoon.length; i++) {
-		let spoonForm = $(spoon[i]).children();
-    let spoonType = $(spoonForm[1]).attr("class");
-		let spoonVal = $(spoonForm[1]).val();
-    let spoonData = { spoonType: parseSpoon(spoonVal)};
-    //todo: push a list of [spoonType, parseSpoon(spoonVal)] instead of just the value
-    //then make add task not fall over
-    // but this is for the new function
-		spoonValList.push(parseSpoon(spoonVal));
-	}
-	const spoonTotal = sumList(spoonValList);
-	const spoonCost = parseSpoonCost(spoonTotal,spoonValList);
-	// add the task name
-	const taskNameBox = $(kids[2]);
-	const grandkids = taskNameBox.children();
-	const taskNameInput = $(grandkids[1]);
-	const taskName = taskNameInput.val();
-	// spoon counts
-	let j;
-  let spoonCosts = [];
-	for (j = 0; j < spoon.length; j++) {
-		let newSpoonBox = makeTableCell();
-		let spoonForm = $(spoon[j]).children();
-		let spoonVal;
-		if ($(spoonForm[1]).val() == "blank") {
-			spoonVal = "none";
-		} else {
-			spoonVal = $(spoonForm[1]).val();
-		}
-    spoonCosts.push(spoonVal);
-		let spoonDad = spoonForm.parent();
-	}
-  // build the spoon data
-  // doesn't quite work because the data format is wrong
   // clear the new task row
   clearNewTaskRow(dad);
 	// put our newly generated row into the table
@@ -848,7 +809,7 @@ function exportTasksHandler(obj) {
   else {
     error("You have no tasks!",para);
   }
-  };
+}
 
 function importTasksHandler(obj) {
   importBox();
@@ -999,6 +960,7 @@ function importSubmitHandler(obj) {
   } else {
     error("You haven't added any tasks!",importDiv);
   }
+  console.log($("body").data());
 }
 
 function addImportedTaskList(a) {
