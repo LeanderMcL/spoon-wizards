@@ -225,6 +225,7 @@ function saveNewTaskButtonHandler(obj) {
 	// grab the table row containing the button that just got clicked
 	const dad = $(obj).parent().parent();
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
+  console.log(taskData);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
   // give a task ID
   const data = $("body").data();
@@ -1074,7 +1075,8 @@ function getNewTaskData(row) {
 		spoonValList.push(parseSpoon(spoonVal));
 	}
 	const spoonTotal = sumList(spoonValList);
-	const spoonCost = parseSpoonCost(spoonTotal,spoonValList);
+	const spoonCost = parseSpoon((parseSpoonCost(spoonTotal,spoonValList)));
+  console.log(spoonCost);
 	let spoonCostSpan;
 	// add the task name
 	const taskNameBox = $(kids[2]);
@@ -1097,7 +1099,7 @@ function getNewTaskData(row) {
     spoonCosts.push([spoonType, spoonVal]);
 		let spoonDad = spoonForm.parent();
 	}
-  return [spoonTotal,0,taskName,spoonCosts];
+  return [spoonCost,0,taskName,spoonCosts];
 }
 
 function getExportData() {
