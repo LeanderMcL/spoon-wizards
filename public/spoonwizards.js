@@ -351,6 +351,9 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
 			}
 		}
 	});
+  deleteButton.addClass("deletetask");
+  setHTML(deleteButtonBox,deleteButton);
+  const archiveButtonBox = makeTableCell("archivetask");
   const archiveButton = $("<input></input>", {
 		type: "button",
 		value: "Archive",
@@ -360,14 +363,10 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
 			}
 		}
 	});
-	deleteButton.addClass("deletetask");
   archiveButton.addClass("archivetask");
-  if (task.done) {
-    deleteButtonBox.html(archiveButton);
-  } else {
-	  deleteButtonBox.html(deleteButton);
-  }
+  setHTML(archiveButtonBox,archiveButton);
 	newRow.append(deleteButtonBox);
+  newRow.append(archiveButtonBox);
   // finally, stick the new row on the table
   table.append(newRow);
 }
@@ -568,22 +567,9 @@ function completeTask(row) {
   // could this be shortened and still be decently readable?
   const kids = row.children();
   const taskNameBox = $(kids.filter(".tasknamebox"));
-  const removeTaskBox = $(kids.filter(".removetask"));
   // add "completed" class
   // this adds a strikethrough
   taskNameBox.addClass("completed");
-  // change "delete to archive"
-  const archiveButton = $("<input></input>", {
-		type: "button",
-		value: "Archive",
-		on: {
-			click: function() {
-				archiveButtonHandler(this);
-			}
-		}
-	});
-	archiveButton.addClass("archivetask");
-	removeTaskBox.html(archiveButton);
 }
 
 function uncompleteTask(row) {
@@ -591,22 +577,9 @@ function uncompleteTask(row) {
   // again - look into multiple assignment to see if I can shorten this code
   const kids = row.children();
   const taskNameBox = $(kids.filter(".tasknamebox"));
-  const removeTaskBox = $(kids.filter(".removetask"));
   // remove "completed" class
   // removes the strikethrough
   taskNameBox.removeClass("completed");
-  // change "archive" to "delete"
-	const deleteButton = $("<input></input>", {
-		type: "button",
-		value: "Delete",
-		on: {
-			click: function() {
-				deleteButtonHandler(this);
-			}
-		}
-	});
-	deleteButton.addClass("deletetask");
-	removeTaskBox.html(deleteButton);
 }
 
 // -- USER SETTINGS
