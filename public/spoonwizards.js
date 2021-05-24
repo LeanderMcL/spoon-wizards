@@ -848,7 +848,6 @@ function exportTasksHandler(obj) {
   else {
     error("You have no tasks!",para);
   }
-  exportBox(taskData);
   };
 
 function importTasksHandler(obj) {
