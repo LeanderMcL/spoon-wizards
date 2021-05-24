@@ -226,13 +226,6 @@ function saveNewTaskButtonHandler(obj) {
 	const dad = $(obj).parent().parent();
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
-  // give a task ID
-  const data = $("body").data();
-  const taskID = data.taskID + 1;
-  data.taskID++;
-  // add the task object to our stored task data
-  const activeTasks = data.tasks.active;
-  activeTasks[taskID] = taskObject;
 	// list of the tds inside the tr
   // clear the new task row
   clearNewTaskRow(dad);
@@ -261,6 +254,10 @@ function clearNewTaskRow(obj) {
 // it would be nice to take a task data object rather than invidual parameters
 // that's another refactor task
 function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
+  // assign the task a task ID
+  const taskID = assignTaskID();
+  // add the task data to the DOM
+  saveTaskData(taskID,task);
   // create a new row
   const newRow = makeTableRow("task");
   // overall task difficulty
@@ -960,7 +957,6 @@ function importSubmitHandler(obj) {
   } else {
     error("You haven't added any tasks!",importDiv);
   }
-  console.log($("body").data());
 }
 
 function addImportedTaskList(a) {
@@ -1034,6 +1030,19 @@ function buildSpoonData(a) {
       spoonData[spoonType] = parseSpoon(spoonVal);
     }
   return spoonData;
+}
+
+function saveTaskData(id,obj) {
+  const data = $("body").data();
+  const activeTasks = data.tasks.active;
+  activeTasks[id] = obj;
+}
+
+function assignTaskID() {
+  const data = $("body").data();
+  const taskID = data.taskID + 1;
+  data.taskID++;
+  return taskID;
 }
 
 function getNewTaskData(row) {
