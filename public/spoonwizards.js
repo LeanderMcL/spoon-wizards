@@ -225,7 +225,6 @@ function saveNewTaskButtonHandler(obj) {
 	// grab the table row containing the button that just got clicked
 	const dad = $(obj).parent().parent();
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
-  console.log(taskData);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
   // give a task ID
   const data = $("body").data();
@@ -832,7 +831,7 @@ function changeSettingHandler(obj) {
 	}
 }
 
-// -- IMPORT AND EXPORT
+// -- IMPORTING AND EXPORTING TASKS
 
 /*
 * maybe add in a "You have no tasks!" if the exporter can't find any tasks to export
@@ -981,12 +980,23 @@ function importInstructionsHandler(obj) {
 }
 
 function importSubmitHandler(obj) {
-  let data = getImportData();
-  let dataList = importTaskList(data);
-  let valid = validateTaskList(dataList);
+  const data = getImportData();
+  const dataList = importTaskList(data);
+  const valid = validateTaskList(dataList);
+  const importDiv = $("#import-div");
+  const importArea = $("#import-area");
   addImportedTaskList(valid[0]);
-  // to do: pass each list in valid[0] to addTask for adding to the list
-  // also: pass valid[1] to an error handler in case anything didn't make it
+  if (valid[1].length > 0) {
+    const errorString = buildImportErrorString(valid[1]);
+    error(errorString,importDiv);
+    importArea.val(buildErrorImportVal(valid[1]));
+  } else {
+    importArea.val("");
+    if ($("#error").length != 0) {
+      $("#error").remove();
+    }
+  }
+  
 }
 
 function addImportedTaskList(a) {
@@ -1034,7 +1044,6 @@ function makeImportInstructions() {
   return instructionsDiv;
 }
 
-
 // -- USER DATA --
 
 // create the basic object structure for task data
@@ -1076,7 +1085,6 @@ function getNewTaskData(row) {
 	}
 	const spoonTotal = sumList(spoonValList);
 	const spoonCost = parseSpoon((parseSpoonCost(spoonTotal,spoonValList)));
-  console.log(spoonCost);
 	let spoonCostSpan;
 	// add the task name
 	const taskNameBox = $(kids[2]);
@@ -1189,15 +1197,15 @@ function importTask(s) {
 // our input is an array of arrays
 function validateTaskList(a) {
   let r = [];
-  let failed = 0;
+  let failed = []
   for (let i = 0; i < a.length; i++) {
     let toTest = importTask(a[i]);
     let isValid = validateTask(toTest);
-    if (isValid) {
-      r.push(isValid);
+    if (isValid[1]) {
+      r.push(isValid[0]);
     }
     else {
-      failed++;
+      failed.push(isValid[0]);
     }
   }
   return [r, failed];
@@ -1219,9 +1227,9 @@ function validateTask(a) {
     }
   }
   if (v) {
-    return a;
+    return [a, true];
   } else {
-    return false;
+    return [a, false];
   }
 }
 
@@ -1247,24 +1255,64 @@ function validateDone(done) {
   }
 }
 
-// ERROR GENERATOR
+// -- ERROR HANDLING
 
 function error(s,obj) {
-  const div = $("<div></div>");
-  div.addClass("error");
-  setText(div,s);
-  const button = makeButton("OK");
-  button.click(function() {
-    errorOkHandler(this);
-  });
-  div.append(" ");
-  div.append(button);
-  obj.append(div);
+  if ($("#error").length == 0) {
+    const div = $("<div></div>");
+    div.addClass("error");
+    div.attr("id","error");
+    let errorTextSpan = makeSpan();
+    errorTextSpan.attr("id", "error-text");
+    setHTML(errorTextSpan,s);
+    const button = makeButton("OK");
+    button.click(function() {
+      errorOkHandler(this);
+    });
+    div.append(errorTextSpan);
+    div.append(" ");
+    div.append(button);
+    obj.append(div);
+  }
+  else {
+    console.log("refresh");
+    let errorTextSpan = $("#error-text");
+    setHTML(errorTextSpan,s);
+  }
 }
 
 function errorOkHandler(obj) {
   const div = $(obj).parent();
   div.remove();
+}
+
+function buildImportErrorString(l) {
+  let x = l.length;
+  let s;
+  let task = x > 1? "tasks" : "task";
+  s = "The following " + x.toString() + " " + task + " could not be imported:<br>";
+  for (let i = 0; i < l.length; i++) {
+    s += l[i][2] + "<br>";
+  }
+  return s;
+}
+
+function buildErrorImportVal(l) {
+  let s = "";
+  for (let i = 0; i < l.length; i++) {
+    let stringPart = "";
+    for (let j = 0; j < l[i].length; j++) {
+      if (j > 0) {
+        stringPart += ",";
+      }
+      stringPart += l[i][j];
+    }
+    if (i > 0) {
+      s += "\n";
+    }
+    s += stringPart;
+  }
+  return s;
 }
 
 // -- HELPER FUNCTIONS
