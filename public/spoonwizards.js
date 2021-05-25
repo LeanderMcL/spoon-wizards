@@ -854,7 +854,7 @@ function importSubmitHandler(obj) {
       error(errorString,importDiv);
       importArea.val(buildErrorImportVal(valid[1]));
     } else {
-      importArea.val("");
+      importDiv.remove();
       if ($("#error").length != 0) {
         $("#error").remove();
       }
