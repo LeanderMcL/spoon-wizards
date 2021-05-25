@@ -44,6 +44,8 @@ $(document).ready(function() {
 
 // -- SETUP --
 
+// builds the settings paragraph
+// currently: the ability to switch between text and emoji mode
 function buildSettings() {
   const body = $("body");
   const para = $("<p></p>");
@@ -71,6 +73,7 @@ function buildSettings() {
   // need to finish appending the settings stuff to this function
 };
 
+// builds the title of the website
 function buildTitle() {
   const body = $("body");
   const title = $("<h1></h1>");
@@ -78,6 +81,8 @@ function buildTitle() {
   body.append(title);
 }
 
+// builds our options
+// currently: the ability to import and export tasks
 function buildOptions() {
   const body = $("body");
   const para = $("<p></p>");
@@ -102,6 +107,7 @@ function buildOptions() {
   body.append(para);
 };
 
+// builds the task list table
 function buildTaskList() {
 	const body = $("body");
 	// create the task list
@@ -199,6 +205,8 @@ function buildTaskList() {
 	setSpoonWidths(taskList);
 }
 
+// this is a kludge for now
+// sets the width of all spoon cells to be the same as the first one
 function setSpoonWidths(table) {
   const kids = $(table.children());
   const row = $(kids[0]);
@@ -210,10 +218,6 @@ function setSpoonWidths(table) {
 
 
 // -- ADDING TASKS --
-
-// TODO:
-// refactor addTask to use the data from taskData
-// delete all the repeated code from the button handler
 
 // respond to a click on the "add task" button
 function saveNewTaskButtonHandler(obj) {
@@ -251,8 +255,6 @@ function clearNewTaskRow(obj) {
 }
 
 // add a new task to the tasklist table
-// it would be nice to take a task data object rather than invidual parameters
-// that's another refactor task
 function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
   // assign the task a task ID
   const taskID = assignTaskID();
@@ -460,7 +462,6 @@ function saveEditedTaskButtonHandler(obj) {
 }
 
 // updates an edited task
-// TBD: most of this
 // TBD: update the edited tasks in the DOM, reliant on bug #37
 function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
   const kids = row.children();
@@ -560,6 +561,7 @@ function doneHandler(obj) {
   }
 }
 
+// marks a task as completed
 function completeTask(row) {
   // grab the specific parts of the row I need
   // could this be shortened and still be decently readable?
@@ -570,6 +572,7 @@ function completeTask(row) {
   taskNameBox.addClass("completed");
 }
 
+// marks a task as not completed
 function uncompleteTask(row) {
   // grab the specific parts of the row I need
   // again - look into multiple assignment to see if I can shorten this code
@@ -582,6 +585,7 @@ function uncompleteTask(row) {
 
 // -- USER SETTINGS
 
+// switches between text and emoji mode
 function changeSettingHandler(obj) {
 	// grab hold of the new mode
 	const newMode = $(obj).attr("id");
@@ -768,6 +772,7 @@ function changeSettingHandler(obj) {
 
 */
 
+// respond to the Export button
 function exportTasksHandler(obj) {
   const taskData = getExportData();
   const para = $("#options-para");
@@ -779,18 +784,19 @@ function exportTasksHandler(obj) {
   }
 }
 
+// respond to the Import button
 function importTasksHandler(obj) {
   importBox();
 }
 
-// make a box to grab the data
+// make a box to grab import data
 function importBox() {
   const options = $("#options-para");
   let importDiv;
   let importArea;
   const isImportDiv = $("#import-div");
   const isExportDiv = $("#export-div");
-  if (isImportDiv.length === 0) {
+  if (isImportDiv.length === 0) { // there's no import div
     importDiv = buildImportBox();
     importArea = $(importDiv.children()[2]);
     options.append(importDiv);
@@ -800,6 +806,7 @@ function importBox() {
   }
 }
 
+// make a box to contain the export data
 function exportBox(data) {
   // okay so here I wanna:
   // make a div to append to the para and see how that works out? might not need the br at all?
@@ -807,7 +814,7 @@ function exportBox(data) {
   let exportDiv;
   let exportArea;
   const isExportDiv = $("#export-div");
-  if (isExportDiv.length === 0) {
+  if (isExportDiv.length === 0) { // there's no export div
     exportDiv = buildExportBox();
     exportArea = $(exportDiv.children()[2]);
     options.append(exportDiv);
@@ -818,6 +825,7 @@ function exportBox(data) {
   exportArea.val(data);
 }
 
+// build the export box
 function buildExportBox() {
   const exportDiv = $("<div id='export-div'></div>");
   const instructions = $("<button>Instructions</button>");
@@ -840,6 +848,7 @@ function buildExportBox() {
   return exportDiv;
 }
 
+// build the import box
 function buildImportBox() {
   const importDiv = $("<div id='import-div'></div>");
   const instructions = $("<button>Instructions</button>");
@@ -867,16 +876,19 @@ function buildImportBox() {
   return importDiv;
 }
 
+// closes the export box
 function exportCloseHandler(obj) {
   const exportDiv = $("#export-div");
   exportDiv.remove();
 }
 
+// closes the import box
 function importCloseHandler(obj) {
   const importDiv = $("#import-div");
   importDiv.remove();
 }
 
+// shows and hides instructions for exporting data
 function exportInstructionsHandler(obj) {
   if ($(obj).data.open) {
     const instructionsDiv = $("#export-instructions");
@@ -892,6 +904,7 @@ function exportInstructionsHandler(obj) {
   }
 }
 
+// shows and hides instructions for exporting data
 function importInstructionsHandler(obj) {
   if ($(obj).data.open) {
     const instructionsDiv = $("#import-instructions");
@@ -907,6 +920,7 @@ function importInstructionsHandler(obj) {
   }
 }
 
+// handles submitting tasks to be imported
 function importSubmitHandler(obj) {
   const data = getImportData();
   const importDiv = $("#import-div");
@@ -930,12 +944,16 @@ function importSubmitHandler(obj) {
   }
 }
 
+// adds a list of tasks to the task list
+// tasks should be pre-validated
 function addImportedTaskList(a) {
   for (let i = 0; i < a.length; i++) {
     addImportedTask(a[i]);
   }
 }
 
+// adds a task to the task list
+// task should be pre-validated
 function addImportedTask(a) {
   const homeTable = $("#tasklist");
   const homeSpoonTypes = $("body").data("spoonTypes");
@@ -953,6 +971,7 @@ function addImportedTask(a) {
   addTask(homeTable,displayMode,taskObject,homeSpoonTypes,homeSpoonEmoji)
 }
 
+// creates the instructions for exporting
 function makeExportInstructions() {
   const instructionsDiv = $("<div id='export-instructions'></div>");
   const instructionsSpan = makeSpan();
@@ -964,6 +983,7 @@ function makeExportInstructions() {
   return instructionsDiv;
 }
 
+// creates the instructions for importing
 function makeImportInstructions() {
   const instructionsDiv = $("<div id='import-instructions'></div>");
   const instructionsSpan = makeSpan();
@@ -983,6 +1003,7 @@ function initialiseTaskData() {
   return taskData;
 }
 
+// builds data for a specific task
 function buildTaskData(difficulty, done, name, spoons) {
   const taskData = { };
   taskData.name = name;
@@ -992,6 +1013,7 @@ function buildTaskData(difficulty, done, name, spoons) {
   return taskData;
 }
 
+// builds object data for the spoon counts from a list of two-item lists
 function buildSpoonData(a) {
   let spoonData = { };
   for (let i = 0; i < a.length; i++)
@@ -1003,12 +1025,14 @@ function buildSpoonData(a) {
   return spoonData;
 }
 
+// saves task data to the DOM by its ID
 function saveTaskData(id,obj) {
   const data = $("body").data();
   const activeTasks = data.tasks.active;
   activeTasks[id] = obj;
 }
 
+// assign an ID number
 function assignTaskID() {
   const data = $("body").data();
   const taskID = data.taskID + 1;
@@ -1016,6 +1040,7 @@ function assignTaskID() {
   return taskID;
 }
 
+// grabs task data from an open row (either a new task or while being edited)
 function getNewTaskData(row) {
   const kids = row.children();
   // set an overall difficulty for the task
@@ -1067,6 +1092,7 @@ function getNewTaskData(row) {
   return [spoonCost,done,taskName,spoonCosts];
 }
 
+// gets task data from the tasklist
 function getExportData() {
 	const tableRows = $("#tasklist").children();
 	const taskRows = tableRows.filter(".task");
@@ -1089,7 +1115,7 @@ function getImportData() {
   return data;
 }
 
-// our input here is a task row
+// our input here is a closed task row
 function getRowData(obj) {
   const displayMode = $("body").data("displayMode");
   let rowData = "";
@@ -1140,12 +1166,13 @@ function getRowData(obj) {
   return rowData;
 }
 
+// splits the string grabbed from the Import div into individual lines
 function importTaskList(s) {
   let data = s.split("\n");
   return data;
 }
 
-// our input here is a string with the task data in it
+// our input here is a string with the task data in it - returns a list of task data
 function importTask(s) {
   let data = s.split(",");
   return data;
@@ -1168,6 +1195,7 @@ function validateTaskList(a) {
   return [r, failed];
 }
 
+// validates an individual task
 function validateTask(a) {
   let v = true;
   const overallSpoon = (validateSpoon(a[0]));
@@ -1190,6 +1218,7 @@ function validateTask(a) {
   }
 }
 
+// validates a spoon value, which should be a digit between 0 and 4
 function validateSpoon(spoon) {
   const int = parseInt(spoon);
   if (isNaN(int)) {
@@ -1201,6 +1230,7 @@ function validateSpoon(spoon) {
   }
 }
 
+// validates a done value, which should be 0 or 1
 function validateDone(done) {
   const int = parseInt(done);
   if (isNaN(int)) {
@@ -1214,6 +1244,7 @@ function validateDone(done) {
 
 // -- ERROR HANDLING
 
+// creates an error message with an OK button to remove it
 function error(s,obj) {
   if ($("#error").length == 0) {
     const div = $("<div></div>");
@@ -1237,6 +1268,7 @@ function error(s,obj) {
   }
 }
 
+// removes an error message when you click OK
 function errorOkHandler(obj) {
   const div = $(obj).parent();
   div.remove();
@@ -1249,6 +1281,7 @@ function buildImportErrorString(x) {
   return s;
 }
 
+// builds the error string for when you try to import invalid tasks
 function buildErrorImportVal(l) {
   let s = "";
   for (let i = 0; i < l.length; i++) {
