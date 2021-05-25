@@ -1608,7 +1608,7 @@ const spoonList = ["none", "low", "medium", "high", "very high"];
 const spoonTypeList = ["physical", "mental", "social", "travel", "executive-function", "emotional", "time", "stress",
 "pain", "symptoms"];
 
-const veryHighSpoon = String.fromCodePoint(0x26A0) + String.fromCodePoint(0xFE0F);
+const veryHighSpoon = String.fromCodePoint(0x1F7E3) + String.fromCodePoint(0xFE0F);
 const highSpoon = String.fromCodePoint(0x1F534);
 const medSpoon = String.fromCodePoint(0x1F7E1);
 const lowSpoon = String.fromCodePoint(0x1F7E2);
