@@ -604,7 +604,7 @@ function changeSettingHandler(obj) {
 		// change the done? header
 		const doneScreenReaderHeadSpan = makeScreenReaderSpan("done?");
 		const doneHeadSpan = makeSpan();
-    setText(doneHeadSpan);
+    setText(doneHeadSpan,taskDone);
 		doneHeadSpan.attr("title","done?");
 		doneHeader.html(doneScreenReaderHeadSpan);
 		doneHeader.append(doneHeadSpan);
