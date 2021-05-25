@@ -178,7 +178,7 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
   if (displayMode == "text") {
     spoonCostSpan = makeSpan();
     setText(spoonCostSpan,reverseSpoon(task.difficulty));
-    let difficultyBGColour = setSpoonColour(reverseSpoon(task.difficulty));
+    let difficultyBGColour = setSpoonColour(task.difficulty);
     difficultyBox.css("background-color", difficultyBGColour);
   } else if (displayMode == "emoji") {
     spoonCostSpan = trafficLightSpan(task.difficulty,spoonEmojis);
@@ -224,11 +224,12 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
     spoonBox.addClass(spoonType);
     let spoonScreenReaderSpan = makeScreenReaderSpan(spoonType);
     let spoonVal = task.spoons[spoonType];
+    let spoonName = reverseSpoon(spoonVal);
     let spoonSpan;
     if (displayMode == "text") {
       spoonSpan = makeSpan();
-      setText(spoonSpan,spoonVal)
-      let spoonBGColour = setSpoonColour(spoonVal)
+      setText(spoonSpan,spoonName);
+      let spoonBGColour = setSpoonColour(spoonVal);
       spoonBox.css("background-color", spoonBGColour);
     } else if (displayMode == "emoji") {
       spoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
@@ -379,12 +380,13 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
   const difficultySpan = $(difficultyBox.children()[1]);
   let spoonCostSpan;
   const spoonCost = task.difficulty;
+  const spoonName = reverseSpoon(spoonCost);
   if (displayMode == "emoji") {
 		spoonCostSpan = trafficLightSpan(spoonCost,spoonEmojis);
 	} else if (displayMode == "text") {
 		const bgColour = setSpoonColour(spoonCost);
     spoonCostSpan = makeSpan();
-    setText(spoonCostSpan,spoonCost)
+    setText(spoonCostSpan,spoonName)
 		difficultyBox.css("background-color",bgColour);
 	}
   difficultySpan.remove();
@@ -406,13 +408,14 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
     let spoonSpan = $(spoonForm[1]);
     let newSpoonSpan;
     let spoonVal = taskSpoons[spoonTypes[i]];
+    let spoonValName = reverseSpoon(spoonVal);
     // TBD here: convert the numbers to their appropriate values when in the code below
     if (displayMode == "emoji") {
 			newSpoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
 		} else if (displayMode == "text") {
 			let spoonBGColour = setSpoonColour(spoonVal);
 			newSpoonSpan = makeSpan();
-      setText(newSpoonSpan,spoonVal);
+      setText(newSpoonSpan,spoonValName);
 			spoonBox.css("background-color",spoonBGColour);
 		}
     spoonSpan.remove();
@@ -537,11 +540,12 @@ function changeSettingHandler(obj) {
 			let difficultyScreenReaderSpan = $(difficultyBox.children()[0]);
 			let difficultySpan = $(difficultyBox.children()[1]);
 			let difficultyName = difficultySpan.attr("title");
+      let difficultyVal = parseSpoon(difficultyName);
 			let newDifficultySpan = makeSpan();
       setText(newDifficultySpan,difficultyName);
 			difficultyBox.html(difficultyScreenReaderSpan);
 			difficultyBox.append(newDifficultySpan);
-			let spoonColour = setSpoonColour(difficultyName);
+			let spoonColour = setSpoonColour(difficultyVal);
 			difficultyBox.css("background-color", spoonColour);
 			// convert each invididual spoon to text
 			let spoon = rowKids.filter(".spoon");
@@ -550,11 +554,12 @@ function changeSettingHandler(obj) {
 				let spoonBox = $(spoon[k]);
 				let spoonSpan = $(spoonBox.children()[1]);
 				let spoonName = spoonSpan.attr("title");
+        let spoonVal = parseSpoon(spoonName);
 				let newSpoonSpan = makeSpan();
         setText(newSpoonSpan,spoonName);
 				spoonSpan.remove();
 				spoonBox.append(newSpoonSpan);
-				let spoonColour = setSpoonColour(spoonName);
+				let spoonColour = setSpoonColour(spoonVal);
 				spoonBox.css("background-color", spoonColour);
 			}
 		}
@@ -1321,13 +1326,13 @@ function sumList(l) {
 
 // sets a background colour based on a spoon count (for text mode)
 function setSpoonColour(val) {
-	if (val == "very high") {
+	if (val == 4) {
 		return "mediumpurple";
-	} else if (val == "high") {
+	} else if (val == 3) {
 		return "#ff3030";
-	} else if (val == "medium") {
+	} else if (val == 2) {
 		return "#ffec8b";
-	} else if (val == "low") {
+	} else if (val == 1) {
 		return "mediumspringgreen";
 	} else {
 		return "";
