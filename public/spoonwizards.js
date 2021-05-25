@@ -27,7 +27,8 @@ $(document).ready(function() {
              "tasks": taskData, 
              "taskID": 0, 
              "spoonEmoji": spoonListEmoji,
-             "spoonTypes": spoonTypeList } );
+             "spoonTypes": spoonTypeList,
+             "spoonDifficulties": spoonList } );
   // build the page
   buildSettings();
   buildTitle();
@@ -70,7 +71,6 @@ function buildSettings() {
   container.append(" ", emojiLink);
   para.append(container);
   body.append(para);
-  // need to finish appending the settings stuff to this function
 };
 
 // builds the title of the website
@@ -110,97 +110,18 @@ function buildOptions() {
 // builds the task list table
 function buildTaskList() {
 	const body = $("body");
+  const spoonTypes = body.data("spoonTypes");
+  const spoonEmoji = body.data("spoonEmoji"); // will need this to account for emoji mode on page load
+  const spoonDifficulties = body.data("spoonDifficulties");
 	// create the task list
 	const taskList = makeTable();
 	taskList.attr("id","tasklist");
   body.append(taskList);
-	// make the header row
-	const headerRow = makeTableRow();
-	headerRow.addClass("header");
-	headerRow.attr("id","taskhead");
-	// add the difficulty header
-	const difficultyHead = makeTableHead();
-	difficultyHead.addClass("difficultyhead");
-	difficultyHead.html("difficulty");
-	headerRow.append(difficultyHead);
-	// add the done header
-	const doneHead = makeTableHead();
-	doneHead.addClass("donehead");
-	doneHead.html("done?");
-	headerRow.append(doneHead);
-	// add the task name header
-	const nameHead = makeTableHead();
-	nameHead.addClass("namehead");
-	nameHead.html("task");
-	headerRow.append(nameHead);
-	// add the spoon name headers
-	let i;
-	for (i = 0; i < spoonTypeList.length; i++) {
-		let spoonHead = makeTableHead();
-		spoonHead.addClass("spoonhead");
-		spoonHead.addClass(spoonTypeList[i]);
-		let spoonName;
-		if (spoonTypeList[i] == "executive-function") {
-			spoonName = "executive function";
-		} else {
-			spoonName = spoonTypeList[i];
-		}
-		spoonHead.html(spoonName);
-		headerRow.append(spoonHead);
-	}
-	// append the header row to the table
+	// make the header row and append to the table
+	const headerRow = makeTaskHeaderRow("tasklist",spoonTypes); // will probably need header emojis later
 	taskList.append(headerRow);
-	// make the new task row
-	const newTaskRow = makeTableRow();
-	newTaskRow.addClass("newtask");
-	// make the (empty) difficulty box
-	const difficultyBox = makeTableCell();
-	difficultyBox.addClass("difficulty");
-	newTaskRow.append(difficultyBox);
-	// make the (empty) done box
-	const doneBox = makeTableCell();
-	doneBox.addClass("done");
-	newTaskRow.append(doneBox);
-	// make the task box
-	const taskNameBox = makeTableCell();
-	taskNameBox.addClass("name");
-	const screenReaderName = makeScreenReaderSpan("task name");
-	taskNameBox.append(screenReaderName);
-	const textInput = $("<input></input>", {
-		type: "text"
-	});
-	taskNameBox.append(textInput);
-	newTaskRow.append(taskNameBox);
-	// make the spoon selectors
-	let j;
-	for (j = 0; j < spoonTypeList.length; j++) {
-		let spoonBox = makeTableCell();
-		spoonBox.addClass("spoon");
-		spoonBox.addClass(spoonTypeList[j]);
-		let spoonName;
-		if (spoonTypeList[j] == "executive-function") {
-			spoonName = "executive function";
-		} else {
-			spoonName = spoonTypeList[j];
-		}
-		const screenReaderSpoon = makeScreenReaderSpan(spoonName);
-		spoonBox.append(screenReaderSpoon);
-		let spoonSelector = selectorWithBlank(spoonList);
-		spoonSelector.addClass(spoonTypeList[j]);
-		spoonBox.append(spoonSelector);
-		newTaskRow.append(spoonBox);
-	}
-	// add the Add button
-	const changeTaskBox = makeTableCell();
-	changeTaskBox.addClass("changetask");
-	const addButton = $("<button></button>", {
-		type: "button"
-	});
-	addButton.addClass("savenewtask");
-	addButton.html("Add");
-	changeTaskBox.append(addButton);
-	newTaskRow.append(changeTaskBox);
-	// append new task row to table
+	// make the new task row and append to the table
+	const newTaskRow = makeNewTaskRow(spoonTypes,spoonDifficulties);
 	taskList.append(newTaskRow);
 	setSpoonWidths(taskList);
 }
@@ -215,7 +136,6 @@ function setSpoonWidths(table) {
   const width = spoons.outerWidth();
   spoons.outerWidth(width);
 }
-
 
 // -- ADDING TASKS --
 
@@ -1300,7 +1220,7 @@ function buildErrorImportVal(l) {
   return s;
 }
 
-// -- HELPER FUNCTIONS
+// -- SPOON PARSING
 
 // set a traffic light emoji (for spoon counts in emoji mode)
 function trafficLightSpan(val,l) {
@@ -1422,10 +1342,68 @@ function setSpoonColour(val) {
 	}
 }
 
+// returns the right version of executive function for display
+function parseSpoonName(s) {
+  let parsed;
+  if (s === "executive-function") {
+    parsed = "executive function";
+  } else {
+    parsed = s;
+  }
+  return parsed;
+}
+
+// -- HTML WRANGLING
+
 // crates a table header
-function makeTableHead() {
+function makeTableHead(val = "") {
   const th = $("<th></th>");
+  if (val) {
+    th.addClass(val);
+  }
   return th;
+}
+
+// create a difficulty header
+// nb: this assumes text mode and I probably shouldn't
+function makeDifficultyHead() {
+  const head = makeTableHead("difficultyhead");
+  setText(head,"difficulty");
+  return head;
+}
+
+// create a done header
+// refactor for emoji mode later
+function makeDoneHead() {
+  const head = makeTableHead("donehead");
+  setText(head,"done?");
+  return head;
+}
+
+// create a task name header
+function makeNameHead() {
+  const head = makeTableHead("namehead");
+  setText(head,"task");
+  return head;
+}
+
+// create spoon name headers
+// returns an array of header objects
+function makeSpoonHeads(a) {
+  let heads = [];
+  for (let i = 0; i < a.length; i++) {
+    let head = makeSpoonHead(a[i]);
+    heads.push(head);
+  }
+  return heads;
+}
+
+// create individual spoon name headers
+function makeSpoonHead(s) {
+  const head = makeTableHead("spoonhead");
+  head.addClass(s);
+  setText(head,parseSpoonName(s));
+  return head;
 }
 
 // creates a table row
@@ -1437,6 +1415,40 @@ function makeTableRow(val = "") {
 	return tr;
 }
 
+// makes a header row for the tasklist or archive table
+// TODO: account for emoji mode
+function makeTaskHeaderRow(s,spoonTypes) {
+  const row = makeTableRow("header");
+  if (s === "tasklist") {
+    row.attr("id", "taskhead");
+  }
+  const difficultyHead = makeDifficultyHead();
+  const doneHead = makeDoneHead();
+  const nameHead = makeNameHead();
+  const spoonHeads = makeSpoonHeads(spoonTypes);
+  row.append(difficultyHead,doneHead,nameHead);
+  for (let i = 0; i < spoonHeads.length; i++) {
+    row.append(spoonHeads[i]);
+  }
+  return row;
+}
+
+// makes a new task row for the tasklist or archive table
+function makeNewTaskRow(spoonTypes,spoonDifficulties) {
+  const row = makeTableRow("newtask");
+  const difficultyBox = makeNewTaskDifficulty();
+  const doneBox = makeNewTaskDone();
+  const nameBox = makeNewTaskName();
+  const spoonBoxes = makeNewTaskSpoons(spoonTypes,spoonDifficulties);
+  const addBox = makeNewTaskAdd();
+  row.append(difficultyBox,doneBox,nameBox);
+  for (let i = 0; i < spoonBoxes.length; i++) {
+    row.append(spoonBoxes[i]);
+  }
+  row.append(addBox);
+  return row;
+}
+
 // creates a table cell
 function makeTableCell(val = "") {
 	const td = $("<td></td>");
@@ -1444,6 +1456,56 @@ function makeTableCell(val = "") {
     td.addClass(val);
   }
 	return td;
+}
+
+// makes the difficulty cell for a new task row
+function makeNewTaskDifficulty() {
+  const cell = makeTableCell("difficulty");
+  return cell;
+}
+
+function makeNewTaskDone() {
+  const cell = makeTableCell("done");
+  return cell;
+}
+
+function makeNewTaskName() {
+  const cell = makeTableCell("name");
+  const screenReaderName = makeScreenReaderSpan("task name");
+  const textInput = makeTextInput();
+  cell.append(screenReaderName,textInput);
+  return cell;
+}
+
+function makeNewTaskSpoons(spoonTypes,spoonDifficulties) {
+  let cells = [];
+  for (let i = 0; i < spoonTypes.length; i++) {
+    let cell = makeNewTaskSpoon(spoonTypes[i],spoonDifficulties);
+    cells.push(cell);
+  }
+  return cells;
+}
+
+function makeNewTaskSpoon(s,spoonDifficulties) {
+  const cell = makeTableCell("spoon");
+  cell.addClass(s);
+  const spoonName = parseSpoonName(s);
+  const screenReaderSpan = makeScreenReaderSpan(spoonName);
+  const spoonSelector = selectorWithBlank(spoonDifficulties);
+  spoonSelector.addClass(s);
+  cell.append(screenReaderSpan,spoonSelector);
+  // TODO:
+  // add the rest of the stuff needed from buildTaskList
+  // so that we have screen reader friendliness and a text input
+  return cell;
+}
+
+function makeNewTaskAdd() {
+  const cell = makeTableCell("changetask");
+  const button = makeButton("Add");
+  button.addClass("savenewtask");
+  cell.append(button);
+  return cell;
 }
 
 // creates a table
@@ -1483,24 +1545,27 @@ function makeScreenReaderSpan() {
 	return span;
 }
 
-// clears the value of an html object
+// clears the value of a jquery object
 function clearVal(obj) {
   obj.val("");
 }
 
-// sets the value of an html object
+// sets the value of a jquery object
 function setVal(obj,val) {
   obj.val(val);
 }
 
+// sets the html attribute of a jquery object
 function setHTML(obj,val) {
   obj.html(val);
 }
 
+// sets the text attribute of a jquery object
 function setText(obj,val) {
   obj.text(val);
 }
 
+// makes a button
 function makeButton(text) {
   const button = $("<button></button>");
   button.val(text);
@@ -1508,6 +1573,7 @@ function makeButton(text) {
   return button;
 }
 
+// makes a link
 function makeLink(text,href) {
   const link = $("<a href='" + href+ "'>" + text + "</a>");
   link.text = text;
@@ -1515,6 +1581,15 @@ function makeLink(text,href) {
   return link;
 }
 
+// makes a blank text input box
+function makeTextInput() {
+  const textInput = $("<input></input>", {
+		  type: "text"
+	});
+  return textInput;
+}
+
+// gets the grandparent of a jquery object
 function getGrandparent(obj) {
   const grandparent = obj.parent().parent();
   return grandparent;
