@@ -126,17 +126,6 @@ function buildTaskList() {
 	setSpoonWidths(taskList);
 }
 
-// this is a kludge for now
-// sets the width of all spoon cells to be the same as the first one
-function setSpoonWidths(table) {
-  const kids = $(table.children());
-  const row = $(kids[0]);
-  const cells = $(row.children());
-  const spoons = cells.filter(".spoonhead");
-  const width = spoons.outerWidth();
-  spoons.outerWidth(width);
-}
-
 // -- ADDING TASKS --
 
 // respond to a click on the "add task" button
@@ -234,7 +223,7 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
     let spoonType = spoonTypes[i];
     spoonBox.addClass(spoonType);
     let spoonScreenReaderSpan = makeScreenReaderSpan(spoonType);
-    let spoonVal = reverseSpoon(task.spoons[spoonType]);
+    let spoonVal = task.spoons[spoonType];
     let spoonSpan;
     if (displayMode == "text") {
       spoonSpan = makeSpan();
@@ -389,7 +378,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
   const difficultyBox = $(kids.filter(".difficultybox")[0]);
   const difficultySpan = $(difficultyBox.children()[1]);
   let spoonCostSpan;
-  const spoonCost = reverseSpoon(task.difficulty);
+  const spoonCost = task.difficulty;
   if (displayMode == "emoji") {
 		spoonCostSpan = trafficLightSpan(spoonCost,spoonEmojis);
 	} else if (displayMode == "text") {
@@ -416,7 +405,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
     let spoonForm = spoonBox.children();
     let spoonSpan = $(spoonForm[1]);
     let newSpoonSpan;
-    let spoonVal = reverseSpoon(taskSpoons[spoonTypes[i]]);
+    let spoonVal = taskSpoons[spoonTypes[i]];
     // TBD here: convert the numbers to their appropriate values when in the code below
     if (displayMode == "emoji") {
 			newSpoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
@@ -637,8 +626,9 @@ function changeSettingHandler(obj) {
 			let difficultyKids = difficultyBox.children();
 			let difficultyScreenReaderSpan = $(difficultyKids[0]);
 			let difficultyText = $(difficultyKids[1]).html();
+      let difficulty = parseSpoon(difficultyText);
 			let difficultySpan = makeSpan();
-      setHTML(difficultySpan,trafficLightSpan(difficultyText,spoonListEmoji));
+      setHTML(difficultySpan,trafficLightSpan(difficulty,spoonListEmoji));
 			difficultySpan.attr("title", difficultyText);
 			difficultyBox.html(difficultyScreenReaderSpan);
 			difficultyBox.append(difficultySpan);
@@ -650,8 +640,9 @@ function changeSettingHandler(obj) {
 				let spoonBox = $(spoon[n]);
 				let spoonSpan = $(spoonBox.children()[1]);
 				let spoonName = spoonSpan.html();
-				let newSpoonSpan = makeSpan(trafficLightSpan(spoonName,spoonListEmoji));
-        setHTML(newSpoonSpan,trafficLightSpan(spoonName,spoonListEmoji));
+        let spoonCost = parseSpoon(spoonName);
+				let newSpoonSpan = makeSpan();
+        setHTML(newSpoonSpan,trafficLightSpan(spoonCost,spoonListEmoji));
 				newSpoonSpan.attr("title",spoonName);
 				spoonSpan.remove();
 				spoonBox.append(newSpoonSpan);
@@ -1225,16 +1216,16 @@ function buildErrorImportVal(l) {
 // set a traffic light emoji (for spoon counts in emoji mode)
 function trafficLightSpan(val,l) {
 	const span = makeSpan();
-	if (val == "very high") {
+	if (val == 4) {
 		span.html(l[0]);
 		span.attr("title","very high");
-	} else if (val == "high") {
+	} else if (val == 3) {
 		span.html(l[1]);
 		span.attr("title","high");
-	} else if (val == "medium") {
+	} else if (val == 2) {
 		span.html(l[2]);
 		span.attr("title","medium");
-	} else if (val == "low") {
+	} else if (val == 1) {
 		span.html(l[3]);
 		span.attr("title","low");
 	} else {
@@ -1259,6 +1250,7 @@ function parseSpoon(val) {
 	}
 }
 
+// takes a numeric input and returns the text value of its difficulty
 function reverseSpoon(val) {
   if (val === 4) {
     return "very high";
@@ -1512,6 +1504,17 @@ function makeNewTaskAdd() {
 function makeTable() {
 	const table = $("<table></table>");
 	return table;
+}
+
+// this is a kludge for now
+// sets the width of all spoon cells to be the same as the first one
+function setSpoonWidths(table) {
+  const kids = $(table.children());
+  const row = $(kids[0]);
+  const cells = $(row.children());
+  const spoons = cells.filter(".spoonhead");
+  const width = spoons.outerWidth();
+  spoons.outerWidth(width);
 }
 
 // creates a selector from a list
