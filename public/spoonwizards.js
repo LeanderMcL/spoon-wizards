@@ -410,7 +410,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
 	taskNameBox.append(taskNameSpan);
   // update spoon counts
   const spoon = kids.filter(".spoon");
-  const taskSpoons = task.spoons
+  const taskSpoons = task.spoons;
   for (let i = 0; i < spoonTypes.length; i++) {
     let spoonBox = $(spoon.filter("." + spoonTypes[i])[0]);
     let spoonForm = spoonBox.children();
@@ -419,7 +419,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
     let spoonVal = reverseSpoon(taskSpoons[spoonTypes[i]]);
     // TBD here: convert the numbers to their appropriate values when in the code below
     if (displayMode == "emoji") {
-			newSpoonSpan = trafficLightSpan(spoonVal,spoonTypes);
+			newSpoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
 		} else if (displayMode == "text") {
 			let spoonBGColour = setSpoonColour(spoonVal);
 			newSpoonSpan = makeSpan();
