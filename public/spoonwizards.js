@@ -227,7 +227,7 @@ function saveNewTaskButtonHandler(obj) {
   const homeTypesList = $("body").data("spoonTypes");
 	const displayMode = $("body").data("displayMode");
 	// grab the table row containing the button that just got clicked
-	const dad = $(obj).parent().parent();
+	const dad = getGrandparent($(obj));
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
 	// list of the tds inside the tr
@@ -378,7 +378,7 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
 // respond to a click on the "Edit" button
 function editButtonHandler(obj) {
 	const displayMode = $("body").data("displayMode");
-	const dad = $(obj).parent().parent();
+	const dad = getGrandparent($(obj));
 	const kids = dad.children();
 	// change the task name field back to an input box
 	const taskNameBox = $(kids[2]);
@@ -454,7 +454,7 @@ function saveEditedTaskButtonHandler(obj) {
 	const homeTable = $("#tasklist");
 	const homeSpoonList = $("body").data("spoonTypes");
   const homeSpoonEmoji = $("body").data("spoonEmoji");
-	const dad = $(obj).parent().parent();
+	const dad = getGrandparent($(obj));
 	const kids = dad.children();
   const taskData = getNewTaskData(dad);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
@@ -528,7 +528,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
 
 // respond to the Delete button
 function deleteButtonHandler(obj) {
-	const dad = $(obj).parent().parent();
+	const dad = getGrandparent($(obj));
 	const kids = dad.children();
 	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
 	const taskName = $(taskNameBox.children()[1]).html();
@@ -550,7 +550,7 @@ function archiveButtonHandler(obj) {
 function doneHandler(obj) {
 	const thisBox = $(obj);
 	const amIChecked = thisBox.prop("checked");
-	const dad = thisBox.parent().parent();
+	const dad = getGrandparent(thisBox);
 	const kids = dad.children();
 	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
 	const removeTaskBox = $(kids.filter(".removetask")[0]);
@@ -1513,6 +1513,11 @@ function makeLink(text,href) {
   link.text = text;
   link.href = href;
   return link;
+}
+
+function getGrandparent(obj) {
+  const grandparent = obj.parent().parent();
+  return grandparent;
 }
 
 // -- BASIC DATA --
