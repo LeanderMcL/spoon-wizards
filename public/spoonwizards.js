@@ -19,40 +19,42 @@
 - simple mode
 */
 
-$(document).ready(function()
-{
-	const body = $("body");
-  const taskData = initialiseTaskData();
-  // add basic data to the body of the page
-	body.data( 
-    { 
-      "displayMode": "text",
-      "tasks": taskData, 
-      "taskID": 0, 
-      "spoonEmoji": spoonListEmoji,
-      "spoonTypes": spoonTypeList,
-      "spoonDifficulties": spoonList
-    }
-  );
-  // build the page
-  buildSettings();
-  buildTitle();
-  buildOptions();
-	buildTaskList();
-	const table = $("#tasklist");
-	$(".savenewtask").click(
-    function()
-    {
-		saveNewTaskButtonHandler(this);
-	  }
-  );
-	$("a.setting").click(
-    function()
-    {
-		changeSettingHandler(this);
-	  }
-  );
-});
+$(document).ready(
+  function()
+  {
+	  const body = $("body");
+    const taskData = initialiseTaskData();
+    // add basic data to the body of the page
+	  body.data( 
+      { 
+        "displayMode": "text",
+        "tasks": taskData, 
+        "taskID": 0, 
+        "spoonEmoji": spoonListEmoji,
+        "spoonTypes": spoonTypeList,
+        "spoonDifficulties": spoonList
+      }
+    );
+    // build the page
+    buildSettings();
+    buildTitle();
+    buildOptions();
+	  buildTaskList();
+	  const table = $("#tasklist");
+	  $(".savenewtask").click(
+      function()
+      {
+		  saveNewTaskButtonHandler(this);
+	    }
+    );
+	  $("a.setting").click(
+      function()
+      {
+		  changeSettingHandler(this);
+	    }
+    );
+  }
+);
 
 // -- SETUP --
 
@@ -332,7 +334,17 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
 	newRow.append(deleteButtonBox);
   newRow.append(archiveButtonBox);
   // finally, stick the new row on the table
-  table.append(newRow);
+  const firstTask = tasksExist();
+  console.log(firstTask);
+  if (firstTask)
+  {
+    firstTask.before(newRow);
+  }
+  else
+  {
+    table.append(newRow);
+  }
+  console.log(tasksExist());
 }
 
 // -- EDITING TASKS --
@@ -1021,7 +1033,7 @@ function importSubmitHandler(obj)
 // tasks should be pre-validated
 function addImportedTaskList(a)
 {
-  for (let i = 0; i < a.length; i++)
+  for (let i = a.length - 1; i >= 0; i--) // iterate backwards over the list so we don't keep reversing it
   {
     addImportedTask(a[i]);
   }
@@ -1630,6 +1642,20 @@ function parseSpoonName(s)
 }
 
 // -- HTML WRANGLING
+
+// returns the first task row if it exists, otherwise false
+function tasksExist()
+{
+  const tasks = $(".task");
+  if (tasks.length == 0)
+  {
+    return false;
+  }
+  else
+  {
+    return $(tasks[0]);
+  }
+}
 
 // crates a table header
 function makeTableHead(val = "")
