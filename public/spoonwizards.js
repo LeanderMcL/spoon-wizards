@@ -19,35 +19,47 @@
 - simple mode
 */
 
-$(document).ready(function() {
+$(document).ready(function()
+{
 	const body = $("body");
   const taskData = initialiseTaskData();
   // add basic data to the body of the page
-	body.data( { "displayMode": "text",
-             "tasks": taskData, 
-             "taskID": 0, 
-             "spoonEmoji": spoonListEmoji,
-             "spoonTypes": spoonTypeList,
-             "spoonDifficulties": spoonList } );
+	body.data( 
+    { 
+      "displayMode": "text",
+      "tasks": taskData, 
+      "taskID": 0, 
+      "spoonEmoji": spoonListEmoji,
+      "spoonTypes": spoonTypeList,
+      "spoonDifficulties": spoonList
+    }
+  );
   // build the page
   buildSettings();
   buildTitle();
   buildOptions();
 	buildTaskList();
 	const table = $("#tasklist");
-	$(".savenewtask").click(function() {
+	$(".savenewtask").click(
+    function()
+    {
 		saveNewTaskButtonHandler(this);
-	});
-	$("a.setting").click(function(){
+	  }
+  );
+	$("a.setting").click(
+    function()
+    {
 		changeSettingHandler(this);
-	});
+	  }
+  );
 });
 
 // -- SETUP --
 
 // builds the settings paragraph
 // currently: the ability to switch between text and emoji mode
-function buildSettings() {
+function buildSettings()
+{
   const body = $("body");
   const para = $("<p></p>");
   const container = makeSpan();
@@ -60,11 +72,12 @@ function buildSettings() {
   textSetting.addClass("display-mode");
   textSetting.attr("id","text");
   textSetting.text("text");
-  const emojiLink = $("<a></a>", {
-	  href: "javascript:void(0)",
-	  id: "emoji",
-	  html: "emoji",
-  });
+  const emojiLink = $("<a></a>",
+    {
+	    href: "javascript:void(0)",
+	    id: "emoji",
+	    html: "emoji",
+    });
   emojiLink.addClass("setting");
   emojiLink.addClass("display-mode");
   container.append(textSetting);
@@ -74,7 +87,8 @@ function buildSettings() {
 };
 
 // builds the title of the website
-function buildTitle() {
+function buildTitle()
+{
   const body = $("body");
   const title = $("<h1></h1>");
   title.text("Spoon Wizards");
@@ -83,18 +97,25 @@ function buildTitle() {
 
 // builds our options
 // currently: the ability to import and export tasks
-function buildOptions() {
+function buildOptions()
+{
   const body = $("body");
   const para = $("<p></p>");
   const container = makeSpan();
   const importButton = makeButton("Import");
   const exportButton = makeButton("Export");
-  exportButton.click(function() {
+  exportButton.click(
+    function()
+    {
     exportTasksHandler(this);
-  });
-  importButton.click(function() {
-    importTasksHandler(this);
-  });
+    }
+  );
+  importButton.click(
+    function()
+    {
+      importTasksHandler(this);
+    }
+  );
   para.addClass("options");
   para.attr("id","options-para");
   container.addClass("options");
@@ -108,7 +129,8 @@ function buildOptions() {
 };
 
 // builds the task list table
-function buildTaskList() {
+function buildTaskList()
+{
 	const body = $("body");
   const spoonTypes = body.data("spoonTypes");
   const spoonEmoji = body.data("spoonEmoji"); // will need this to account for emoji mode on page load
@@ -129,7 +151,8 @@ function buildTaskList() {
 // -- ADDING TASKS --
 
 // respond to a click on the "add task" button
-function saveNewTaskButtonHandler(obj) {
+function saveNewTaskButtonHandler(obj)
+{
 	// grab the table, spoon list, and display mode for passing on to addTask
 	const homeTable = $("#tasklist");
 	const homeEmojiList = $("body").data("spoonEmoji");
@@ -148,13 +171,13 @@ function saveNewTaskButtonHandler(obj) {
 };
 
 // clear the new task row
-function clearNewTaskRow(obj) {
+function clearNewTaskRow(obj)
+{
   const kids = obj.children();
   const taskNameBox = $(kids[2]);
   const taskNameInput = $(taskNameBox.children()[1]);
   clearVal(taskNameInput);
   const spoon = kids.filter(".spoon");
-
   let i;
   for (i = 0; i < spoon.length; i++) {
     let spoonBox = $(spoon[i]);
@@ -164,7 +187,8 @@ function clearNewTaskRow(obj) {
 }
 
 // add a new task to the tasklist table
-function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
+function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
+{
   // assign the task a task ID
   const taskID = assignTaskID();
   // add the task data to the DOM
@@ -175,14 +199,18 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
   const difficultyBox = makeTableCell("difficultybox");
   const difficultyScreenReaderSpan = makeScreenReaderSpan("difficulty");
   let spoonCostSpan;
-  if (displayMode == "text") {
+  if (displayMode == "text")
+  {
     spoonCostSpan = makeSpan();
     setText(spoonCostSpan,reverseSpoon(task.difficulty));
     let difficultyBGColour = setSpoonColour(task.difficulty);
     difficultyBox.css("background-color", difficultyBGColour);
-  } else if (displayMode == "emoji") {
+  }
+  else if (displayMode == "emoji")
+  {
     spoonCostSpan = trafficLightSpan(task.difficulty,spoonEmojis);
   }
+  // if neither of these ifs is true, I probably want to generate an error message and return here
   difficultyBox.append(difficultyScreenReaderSpan);
   difficultyBox.append(spoonCostSpan);
   newRow.append(difficultyBox);
@@ -190,16 +218,21 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
 	const doneBox = makeTableCell("donebox");
 	const doneScreenReaderSpan = makeScreenReaderSpan("done?");
 	doneBox.append(doneScreenReaderSpan);
-	const done = $("<input></input>", {
-		type: "checkbox",
-		on: {
+	const done = $
+  (
+    "<input></input>",
+    {
+		  type: "checkbox",
+		  on: {
 			click: function() {
-				doneHandler(this);
+				 doneHandler(this);
 			}
-		}
-	});
+		 }
+	  }
+  );
 	done.addClass("done");
-  if (task.done) {
+  if (task.done) // could probably test this once rather than twice
+  {
     done.prop("checked", true);
   }
 	doneBox.append(done);
@@ -211,14 +244,16 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
   const taskNameSpan = makeSpan();
   taskNameSpan.addClass("taskname");
   setText(taskNameSpan,task.name);
-  if (task.done) {
+  if (task.done)
+  {
     nameBox.addClass("completed");
   }
   nameBox.append(taskNameScreenReaderSpan);
   nameBox.append(taskNameSpan);
   newRow.append(nameBox);
   // spoon counts
-  for (let i = 0; i < spoonTypes.length; i++) {
+  for (let i = 0; i < spoonTypes.length; i++)
+  {
     let spoonBox = makeTableCell("spoon");
     let spoonType = spoonTypes[i];
     spoonBox.addClass(spoonType);
@@ -226,12 +261,15 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
     let spoonVal = task.spoons[spoonType];
     let spoonName = reverseSpoon(spoonVal);
     let spoonSpan;
-    if (displayMode == "text") {
+    if (displayMode == "text")
+    {
       spoonSpan = makeSpan();
       setText(spoonSpan,spoonName);
       let spoonBGColour = setSpoonColour(spoonVal);
       spoonBox.css("background-color", spoonBGColour);
-    } else if (displayMode == "emoji") {
+    }
+    else if (displayMode == "emoji")
+    {
       spoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
     }
     spoonBox.append(spoonScreenReaderSpan);
@@ -240,41 +278,56 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
   }
   // add the edit button
   const editButtonBox = makeTableCell("changetask");
-	const editButton = $("<input></input>", {
-		type: "button",
-		value: "Edit",
-		on: {
-			click: function() {
-				editButtonHandler(this);
-			}
+	const editButton = $
+  (
+    "<input></input>",
+    {
+		  type: "button",
+		  value: "Edit",
+		  on:
+      {
+			  click: function()
+        {
+				  editButtonHandler(this);
+			  }
+		  }
 		}
-		});
+  );
 	editButton.addClass("edittask");
 	editButtonBox.html(editButton);
 	newRow.append(editButtonBox);
   // add the delete button (or archive button for completed tasks)
   const deleteButtonBox = makeTableCell("removetask");
-	const deleteButton = $("<input></input>", {
-		type: "button",
-		value: "Delete",
-		on: {
-			click: function() {
-				deleteButtonHandler(this);
-			}
-		}
-	});
+	const deleteButton = $(
+    "<input></input>", 
+    {
+		  type: "button",
+		  value: "Delete",
+		  on:
+      {
+			  click: function()
+        {
+				  deleteButtonHandler(this);
+			  }
+		  }
+	  }
+  );
   deleteButton.addClass("deletetask");
   setHTML(deleteButtonBox,deleteButton);
   const archiveButtonBox = makeTableCell("archivetask");
-  const archiveButton = $("<input></input>", {
-		type: "button",
-		value: "Archive",
-		on: {
-			click: function() {
-				archiveButtonHandler(this);
-			}
-		}
-	});
+  const archiveButton = $("<input></input>",
+    {
+		  type: "button",
+		  value: "Archive",
+		  on:
+      {
+			  click: function()
+        {
+				  archiveButtonHandler(this);
+			  }
+		  }
+	  }
+  );
   archiveButton.addClass("archivetask");
   setHTML(archiveButtonBox,archiveButton);
 	newRow.append(deleteButtonBox);
@@ -286,7 +339,8 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis) {
 // -- EDITING TASKS --
 
 // respond to a click on the "Edit" button
-function editButtonHandler(obj) {
+function editButtonHandler(obj)
+{
 	const displayMode = $("body").data("displayMode");
 	const dad = getGrandparent($(obj));
 	const kids = dad.children();
@@ -312,51 +366,67 @@ function editButtonHandler(obj) {
 	const veryHighOption = "<option value='very high'>very high</option>";
 	const veryHighOptionSelected = "<option value='very high' selected='selected'>very high</option>";
 	let i;
-	for (i = 0; i < spoon.length; i++) {
+	for (i = 0; i < spoon.length; i++)
+  {
 		let spoonSelector = $("<select></select>");
 		let classes = spoon[i].classList;
 		let spoonContent = $(spoon[i]);
 		let spoonTitle;
 		let spoonSpan = $(spoonContent.children()[1]);
-		if (displayMode == "emoji") {
+		if (displayMode == "emoji")
+    {
 			spoonTitle = $(spoonContent.children()[1]).attr("title");
-		} else if (displayMode == "text") {
+		}
+    else if (displayMode == "text")
+    {
 			spoonTitle = $(spoonContent.children()[1]).html();
 			$(spoon[i]).css("background-color","");
 		}
 		let j;
 		spoonSelector.addClass(classes[1]);
-		if (spoonTitle == "very high") {
+		if (spoonTitle == "very high")
+    {
 			spoonSelector.append(blankOption, noneOption, lowOption, mediumOption, highOption, veryHighOptionSelected);
-		} else if (spoonTitle == "high") {
+		} else if (spoonTitle == "high")
+    {
 			spoonSelector.append(blankOption, noneOption, lowOption, mediumOption, highOptionSelected, veryHighOption);
-		} else if (spoonTitle == "medium") {
+		} else if (spoonTitle == "medium")
+    {
 			spoonSelector.append(blankOption, noneOption, lowOption, mediumOptionSelected, highOption, veryHighOption);
-		} else if (spoonTitle == "low") {
+		} else if (spoonTitle == "low")
+    {
 			spoonSelector.append(blankOption, noneOption, lowOptionSelected, mediumOption, highOption, veryHighOption);
-		} else {
+		} else
+    {
 			spoonSelector.append(blankOption, noneOption, lowOption, mediumOption, highOption, veryHighOption);
 		}
 		spoonSpan.remove();
 		$(spoon[i]).append(spoonSelector);
 	}
 	// change the edit button back to a save button with its own handler function
-	const saveButton = $("<input></input>", {
-		type: "button",
-		value: "Save",
-		on: {
-			click: function() {
-				saveEditedTaskButtonHandler(this);
-			}
-		}
-	});
+	const saveButton = $
+  (
+    "<input></input>",
+    {
+		  type: "button",
+		  value: "Save",
+		  on:
+      {
+			  click: function()
+        {
+				  saveEditedTaskButtonHandler(this);
+			  }
+		  }
+	  }
+  );
 	saveButton.addClass("saveedited");
 	const changeTask = $(kids.filter(".changetask")[0]);
 	changeTask.html(saveButton);
-};
+}
 
 // respond to the Save button
-function saveEditedTaskButtonHandler(obj) {
+function saveEditedTaskButtonHandler(obj)
+{
 	// code goes here
 	// save the new name/spoon values in place
 	// reinstate the edit button
@@ -373,7 +443,8 @@ function saveEditedTaskButtonHandler(obj) {
 
 // updates an edited task
 // TBD: update the edited tasks in the DOM, reliant on bug #37
-function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
+function updateTask(row,displayMode,task,spoonTypes,spoonEmojis)
+{
   const kids = row.children();
   // update the overall difficulty
   const difficultyBox = $(kids.filter(".difficultybox")[0]);
@@ -381,9 +452,12 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
   let spoonCostSpan;
   const spoonCost = task.difficulty;
   const spoonName = reverseSpoon(spoonCost);
-  if (displayMode == "emoji") {
+  if (displayMode == "emoji")
+  {
 		spoonCostSpan = trafficLightSpan(spoonCost,spoonEmojis);
-	} else if (displayMode == "text") {
+	}
+  else if (displayMode == "text")
+  {
 		const bgColour = setSpoonColour(spoonCost);
     spoonCostSpan = makeSpan();
     setText(spoonCostSpan,spoonName)
@@ -402,7 +476,8 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
   // update spoon counts
   const spoon = kids.filter(".spoon");
   const taskSpoons = task.spoons;
-  for (let i = 0; i < spoonTypes.length; i++) {
+  for (let i = 0; i < spoonTypes.length; i++)
+  {
     let spoonBox = $(spoon.filter("." + spoonTypes[i])[0]);
     let spoonForm = spoonBox.children();
     let spoonSpan = $(spoonForm[1]);
@@ -410,9 +485,12 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
     let spoonVal = taskSpoons[spoonTypes[i]];
     let spoonValName = reverseSpoon(spoonVal);
     // TBD here: convert the numbers to their appropriate values when in the code below
-    if (displayMode == "emoji") {
+    if (displayMode == "emoji")
+    {
 			newSpoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
-		} else if (displayMode == "text") {
+		}
+    else if (displayMode == "text")
+    {
 			let spoonBGColour = setSpoonColour(spoonVal);
 			newSpoonSpan = makeSpan();
       setText(newSpoonSpan,spoonValName);
@@ -423,15 +501,21 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
   }
   // reinstate the edit button
   const editButtonBox = $(kids.filter(".changetask")[0]);
-	const editButton = $("<input></input>", {
-		type: "button",
-		value: "Edit",
-		on: {
-			click: function() {
-				editButtonHandler(this);
-			}
+	const editButton = $
+  (
+    "<input></input>",
+    {
+		  type: "button",
+		  value: "Edit",
+		  on: 
+      {
+			  click: function()
+        {
+				  editButtonHandler(this);
+			  }
+		  }
 		}
-		});
+  );
 	editButton.addClass("edittask");
 	editButtonBox.html(editButton);
 }
@@ -439,42 +523,50 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis) {
 // -- REMOVING TASKS
 
 // respond to the Delete button
-function deleteButtonHandler(obj) {
+function deleteButtonHandler(obj)
+{
 	const dad = getGrandparent($(obj));
 	const kids = dad.children();
 	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
 	const taskName = $(taskNameBox.children()[1]).html();
 	const confirmString = "Really delete " + taskName + "?";
 	const r = confirm(confirmString);
-	if (r == true) {
+	if (r == true)
+  {
 		dad.remove();
 	}
 }
 
 // respond to the Archive button
-function archiveButtonHandler(obj) {
+function archiveButtonHandler(obj)
+{
 	alert("to be done!");
 }
 
 // -- COMPLETING TASKS
 
 // respond to a click on the checkbox for a task
-function doneHandler(obj) {
+function doneHandler(obj)
+{
 	const thisBox = $(obj);
 	const amIChecked = thisBox.prop("checked");
 	const dad = getGrandparent(thisBox);
 	const kids = dad.children();
 	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
 	const removeTaskBox = $(kids.filter(".removetask")[0]);
-	if (amIChecked) { // checkbox is checked
+	if (amIChecked) // checkbox is checked
+  { 
     completeTask(dad);
-	} else { // it's not
+	}
+  else // it's not
+  { 
     uncompleteTask(dad);
   }
 }
 
 // marks a task as completed
-function completeTask(row) {
+function completeTask(row)
+{
   // grab the specific parts of the row I need
   // could this be shortened and still be decently readable?
   const kids = row.children();
@@ -485,7 +577,8 @@ function completeTask(row) {
 }
 
 // marks a task as not completed
-function uncompleteTask(row) {
+function uncompleteTask(row)
+{
   // grab the specific parts of the row I need
   // again - look into multiple assignment to see if I can shorten this code
   const kids = row.children();
@@ -498,7 +591,8 @@ function uncompleteTask(row) {
 // -- USER SETTINGS
 
 // switches between text and emoji mode
-function changeSettingHandler(obj) {
+function changeSettingHandler(obj)
+{
 	// grab hold of the new mode
 	const newMode = $(obj).attr("id");
 	// grab the setting container
@@ -515,14 +609,16 @@ function changeSettingHandler(obj) {
 	const spoonHeaders = headers.filter(".spoonhead");
 	const tableRows = $("#tasklist").children();
 	const taskRows = tableRows.filter(".task");
-	if (newMode == "text") { // switch to text mode
+	if (newMode == "text")
+  { // switch to text mode
 		// change the difficulty header
 		difficultyHeader.html("difficulty");
 		// change the done? header
 		doneHeader.html("done?");
 		// loop over our spoon headers and change them
 		let i;
-		for (i = 0; i < spoonHeaders.length; i++) {
+		for (i = 0; i < spoonHeaders.length; i++)
+    {
 			let thisSpoon = spoonHeaders[i];
 			let spoonType = thisSpoon.classList[1];
 			if (spoonType == "executive-function") {
@@ -532,7 +628,8 @@ function changeSettingHandler(obj) {
 		}
 		// replace emojis in the task rows with text
 		let j;
-		for (j = 0; j < taskRows.length; j++) { // iterating over the tasks
+		for (j = 0; j < taskRows.length; j++)
+    { // iterating over the tasks
 			let row = $(taskRows[j]);
 			let rowKids = row.children();
 			// convert the overall difficulty to text
@@ -550,7 +647,8 @@ function changeSettingHandler(obj) {
 			// convert each invididual spoon to text
 			let spoon = rowKids.filter(".spoon");
 			let k;
-			for (k = 0; k < spoon.length; k++) {
+			for (k = 0; k < spoon.length; k++)
+      {
 				let spoonBox = $(spoon[k]);
 				let spoonSpan = $(spoonBox.children()[1]);
 				let spoonName = spoonSpan.attr("title");
@@ -564,16 +662,22 @@ function changeSettingHandler(obj) {
 			}
 		}
 		// switch our links around
-		const emojiLink = $("<a></a>", {
-			href: "javascript:void(0)",
-			id: "emoji",
-			html: "emoji",
-			on: {
-				click: function() {
-					changeSettingHandler(this);
-				}
-			}
-		});
+		const emojiLink = $
+    (
+      "<a></a>",
+      {
+			  href: "javascript:void(0)",
+			  id: "emoji",
+			  html: "emoji",
+			  on:
+        {
+				  click: function()
+          {
+					  changeSettingHandler(this);
+				  }
+			  }
+		  }
+    );
 		emojiLink.addClass("setting");
 		emojiLink.addClass("display-mode");
 		const textSpan = makeSpan();
@@ -586,7 +690,9 @@ function changeSettingHandler(obj) {
 		// change the display mode to emoji so the rest of the code behaves right
 		const body = $("body");
 		body.data("displayMode","text");
-	} else if (newMode == "emoji") { // switch to emoji mode
+	}
+  else if (newMode == "emoji") // switch to emoji mode
+  { 
 		// change the difficulty header
 		const difficultyScreenReaderHeadSpan = makeScreenReaderSpan();
     setText(difficultyScreenReaderHeadSpan,"difficulty");
@@ -604,13 +710,16 @@ function changeSettingHandler(obj) {
 		doneHeader.append(doneHeadSpan);
 		// loop over our spoon headers and change them
 		let l;
-		for (l = 0; l < spoonHeaders.length; l++) {
+		for (l = 0; l < spoonHeaders.length; l++)
+    {
 			let thisSpoon = spoonHeaders[l];
 			let spoonType = thisSpoon.classList[2];
 			let spoonTypeName;
-			if (spoonType == "executive-function") {
+			if (spoonType == "executive-function")
+      {
 				spoonTypeName = "executive function";
-			} else {
+			}
+      else {
 				spoonTypeName = spoonType;
 			}
 			const spoonHeadScreenReaderSpan = makeScreenReaderSpan(spoonTypeName);
@@ -623,7 +732,8 @@ function changeSettingHandler(obj) {
 		}
 		// replace text in the task rows with emojis
 		let m;
-		for (m = 0; m < taskRows.length; m++) {
+		for (m = 0; m < taskRows.length; m++)
+    {
 			let row = $(taskRows[m]);
 			let rowKids = row.children();
 			// put emojis in the overall difficulty
@@ -641,7 +751,8 @@ function changeSettingHandler(obj) {
 			// put emojis in the spoon count rows
 			let spoon = rowKids.filter(".spoon");
 			let n;
-			for (n = 0; n < spoon.length; n++) {
+			for (n = 0; n < spoon.length; n++)
+      {
 				let spoonBox = $(spoon[n]);
 				let spoonSpan = $(spoonBox.children()[1]);
 				let spoonName = spoonSpan.html();
@@ -660,16 +771,22 @@ function changeSettingHandler(obj) {
 		emojiSpan.attr("id","emoji");
 		emojiSpan.addClass("setting");
 		emojiSpan.addClass("display-mode");
-		const textLink = $("<a></a>", {
-			href: "javascript:void(0)",
-			id: "text",
-			html: "text",
-			on: {
-				click: function() {
-					changeSettingHandler(this);
-				}
-			}
-		});
+		const textLink = $
+    (
+      "<a></a>",
+      {
+			  href: "javascript:void(0)",
+			  id: "text",
+			  html: "text",
+			  on:
+        {
+				  click: function()
+          {
+					  changeSettingHandler(this);
+				  }
+			  }
+		  }
+    );
 		textLink.addClass("setting"),
 		textLink.addClass("display-mode");
 		container.html(textLink);
@@ -689,13 +806,16 @@ function changeSettingHandler(obj) {
 */
 
 // respond to the Export button
-function exportTasksHandler(obj) {
+function exportTasksHandler(obj)
+{
   const taskData = getExportData();
   const para = $("#options-para");
-  if (taskData) {
+  if (taskData)
+  {
     exportBox(taskData);
   }
-  else {
+  else
+  {
     error("You have no tasks!",para);
   }
 }
@@ -706,35 +826,43 @@ function importTasksHandler(obj) {
 }
 
 // make a box to grab import data
-function importBox() {
+function importBox()
+{
   const options = $("#options-para");
   let importDiv;
   let importArea;
   const isImportDiv = $("#import-div");
   const isExportDiv = $("#export-div");
-  if (isImportDiv.length === 0) { // there's no import div
+  if (isImportDiv.length === 0)
+  { // there's no import div
     importDiv = buildImportBox();
     importArea = $(importDiv.children()[2]);
     options.append(importDiv);
-  } else {
+  }
+  else
+  {
     importDiv = isImportDiv;
     importArea = $("#import-area");
   }
 }
 
 // make a box to contain the export data
-function exportBox(data) {
+function exportBox(data)
+{
   // okay so here I wanna:
   // make a div to append to the para and see how that works out? might not need the br at all?
   const options = $("#options-para");
   let exportDiv;
   let exportArea;
   const isExportDiv = $("#export-div");
-  if (isExportDiv.length === 0) { // there's no export div
+  if (isExportDiv.length === 0)
+  { // there's no export div
     exportDiv = buildExportBox();
     exportArea = $(exportDiv.children()[2]);
     options.append(exportDiv);
-  } else {
+  }
+  else
+  {
     exportDiv = isExportDiv;
     exportArea = $("#export-area");
   }
@@ -742,19 +870,25 @@ function exportBox(data) {
 }
 
 // build the export box
-function buildExportBox() {
+function buildExportBox()
+{
   const exportDiv = $("<div id='export-div'></div>");
   const instructions = $("<button>Instructions</button>");
   const buttonsSpan = makeSpan();
   buttonsSpan.attr("id","export-buttons");
   instructions.data("open",0);
-  instructions.click(function() {
-    exportInstructionsHandler(this);
-  })
+  instructions.click(
+    function() {
+      exportInstructionsHandler(this);
+    }
+  )
   const close = $("<button>Close</button>");
-  close.click(function() {
-    exportCloseHandler(this);
-  })
+  close.click(
+    function()
+    {
+      exportCloseHandler(this);
+    }
+  )
   buttonsSpan.append(instructions);
   buttonsSpan.append(close);
   const exportArea = $("<textarea rows='10' cols='100' id='export-area'></textarea");
@@ -765,23 +899,36 @@ function buildExportBox() {
 }
 
 // build the import box
-function buildImportBox() {
+function buildImportBox()
+{
   const importDiv = $("<div id='import-div'></div>");
   const instructions = $("<button>Instructions</button>");
   const buttonsSpan = makeSpan();
   buttonsSpan.attr("id","import-buttons");
   instructions.data("open",0);
-  instructions.click(function() {
-    importInstructionsHandler(this);
-  })
+  instructions.click
+  (
+    function()
+    {
+      importInstructionsHandler(this);
+    }
+  )
   const close = $("<button>Close</button>");
-  close.click(function() {
-    importCloseHandler(this)
-  });
+  close.click
+  (
+    function()
+    {
+      importCloseHandler(this)
+    }
+  );
   const submit = $("<button>Submit</button>");
-  submit.click(function() {
-    importSubmitHandler(this);
-  })
+  submit.click
+  (
+    function()
+    {
+      importSubmitHandler(this);
+    }
+  )
   buttonsSpan.append(instructions);
   buttonsSpan.append(close);
   buttonsSpan.append(submit);
@@ -793,25 +940,31 @@ function buildImportBox() {
 }
 
 // closes the export box
-function exportCloseHandler(obj) {
+function exportCloseHandler(obj)
+{
   const exportDiv = $("#export-div");
   exportDiv.remove();
 }
 
 // closes the import box
-function importCloseHandler(obj) {
+function importCloseHandler(obj)
+{
   const importDiv = $("#import-div");
   importDiv.remove();
 }
 
 // shows and hides instructions for exporting data
-function exportInstructionsHandler(obj) {
-  if ($(obj).data.open) {
+function exportInstructionsHandler(obj)
+{
+  if ($(obj).data.open)
+  {
     const instructionsDiv = $("#export-instructions");
     instructionsDiv.remove();
     $(obj).data.open = 0;
     $(obj).text("Instructions");
-  } else {
+  }
+  else
+  {
     $(obj).data.open = 1;
     $(obj).text("Close instructions");
     const buttonsSpan = $("#export-buttons");
@@ -821,13 +974,17 @@ function exportInstructionsHandler(obj) {
 }
 
 // shows and hides instructions for exporting data
-function importInstructionsHandler(obj) {
-  if ($(obj).data.open) {
+function importInstructionsHandler(obj)
+{
+  if ($(obj).data.open)
+  {
     const instructionsDiv = $("#import-instructions");
     instructionsDiv.remove();
     $(obj).data.open = 0;
     $(obj).text("Instructions");
-  } else {
+  }
+  else
+  {
     $(obj).data.open = 1;
     $(obj).text("Close instructions");
     const buttonsSpan = $("#import-buttons");
@@ -837,40 +994,51 @@ function importInstructionsHandler(obj) {
 }
 
 // handles submitting tasks to be imported
-function importSubmitHandler(obj) {
+function importSubmitHandler(obj)
+{
   const data = getImportData();
   const importDiv = $("#import-div");
-  if (data) {
+  if (data)
+  {
     const dataList = importTaskList(data);
     const valid = validateTaskList(dataList);
     const importArea = $("#import-area");
     addImportedTaskList(valid[0]);
-    if (valid[1].length > 0) {
+    if (valid[1].length > 0)
+    {
       const errorString = buildImportErrorString(valid[1].length);
       error(errorString,importDiv);
       importArea.val(buildErrorImportVal(valid[1]));
-    } else {
+    }
+    else
+    {
       importDiv.remove();
-      if ($("#error").length != 0) {
+      if ($("#error").length != 0)
+      {
         $("#error").remove();
       }
     }
-  } else {
+  }
+  else
+  {
     error("You haven't added any tasks!",importDiv);
   }
 }
 
 // adds a list of tasks to the task list
 // tasks should be pre-validated
-function addImportedTaskList(a) {
-  for (let i = 0; i < a.length; i++) {
+function addImportedTaskList(a)
+{
+  for (let i = 0; i < a.length; i++)
+  {
     addImportedTask(a[i]);
   }
 }
 
 // adds a task to the task list
 // task should be pre-validated
-function addImportedTask(a) {
+function addImportedTask(a)
+{
   const homeTable = $("#tasklist");
   const homeSpoonTypes = $("body").data("spoonTypes");
 	const homeSpoonEmoji = $("body").data("spoonEmoji");
@@ -880,7 +1048,8 @@ function addImportedTask(a) {
   const name = a[2];
   const spoonsRaw = a.slice(3,a.length);
   let spoonsProcessed = [];
-  for (let i = 0; i < spoonsRaw.length; i++) {
+  for (let i = 0; i < spoonsRaw.length; i++)
+  {
     spoonsProcessed.push([homeSpoonTypes[i], reverseSpoon(parseInt(spoonsRaw[i]))]);
   }
   const taskObject = buildTaskData(overallSpoon, done, name, spoonsProcessed);
@@ -888,19 +1057,23 @@ function addImportedTask(a) {
 }
 
 // creates the instructions for exporting
-function makeExportInstructions() {
+function makeExportInstructions()
+{
   const instructionsDiv = $("<div id='export-instructions'></div>");
   const instructionsSpan = makeSpan();
-  instructionsSpan.html("To export your tasks:</br>" + 
-                        "1. Copy the data from the box below</br>" +
-                        "2. Paste into a document or note somewhere safe</br>" +
-                        "3. When you're ready to come back, click the Import button and follow the instructions");
+  instructionsSpan.html
+  (
+    "To export your tasks:</br>" + 
+    "1. Copy the data from the box below</br>" +
+    "2. Paste into a document or note somewhere safe</br>" +
+    "3. When you're ready to come back, click the Import button and follow the instructions");
   instructionsDiv.append(instructionsSpan);
   return instructionsDiv;
 }
 
 // creates the instructions for importing
-function makeImportInstructions() {
+function makeImportInstructions()
+{
   const instructionsDiv = $("<div id='import-instructions'></div>");
   const instructionsSpan = makeSpan();
   instructionsSpan.html("To import your tasks:</br>" +
@@ -914,13 +1087,15 @@ function makeImportInstructions() {
 // -- USER DATA --
 
 // create the basic object structure for task data
-function initialiseTaskData() {
+function initialiseTaskData()
+{
   const taskData = { active: { }, archive: { } };
   return taskData;
 }
 
 // builds data for a specific task
-function buildTaskData(difficulty, done, name, spoons) {
+function buildTaskData(difficulty, done, name, spoons)
+{
   const taskData = { };
   taskData.name = name;
   taskData.difficulty = difficulty;
@@ -930,7 +1105,8 @@ function buildTaskData(difficulty, done, name, spoons) {
 }
 
 // builds object data for the spoon counts from a list of two-item lists
-function buildSpoonData(a) {
+function buildSpoonData(a)
+{
   let spoonData = { };
   for (let i = 0; i < a.length; i++)
     {
@@ -942,7 +1118,8 @@ function buildSpoonData(a) {
 }
 
 // saves task data to the DOM by its ID
-function saveTaskData(id,obj) {
+function saveTaskData(id,obj)
+{
   const data = $("body").data();
   const activeTasks = data.tasks.active;
   activeTasks[id] = obj;
@@ -957,7 +1134,8 @@ function assignTaskID() {
 }
 
 // grabs task data from an open row (either a new task or while being edited)
-function getNewTaskData(row) {
+function getNewTaskData(row)
+{
   const kids = row.children();
   // set an overall difficulty for the task
 	const spoon = kids.filter(".spoon");
@@ -976,12 +1154,15 @@ function getNewTaskData(row) {
   let done;
   if ($(doneBox).children().length != 0) { // we're editing a row, and there's a checkbox to test
     let doneCheck = $($(doneBox).children()[1]).prop("checked");
-    if (doneCheck) {
+    if (doneCheck)
+    {
       done = 1;
-    } else {
+    }
+    else {
       done = 0;
     }
-  } else {
+  }
+  else {
     done = 0;
   }
   // add the task name
@@ -992,14 +1173,18 @@ function getNewTaskData(row) {
 	// spoon counts
 	let j;
   let spoonCosts = [];
-	for (j = 0; j < spoon.length; j++) {
+	for (j = 0; j < spoon.length; j++)
+  {
 		let newSpoonBox = makeTableCell();
 		let spoonForm = $(spoon[j]).children();
     let spoonType = $(spoonForm[1]).attr("class");
 		let spoonVal;
-		if ($(spoonForm[1]).val() == "blank") {
+		if ($(spoonForm[1]).val() == "blank")
+    {
 			spoonVal = "none";
-		} else {
+		}
+    else
+    {
 			spoonVal = $(spoonForm[1]).val();
 		}
     spoonCosts.push([spoonType, spoonVal]);
@@ -1009,16 +1194,20 @@ function getNewTaskData(row) {
 }
 
 // gets task data from the tasklist
-function getExportData() {
+function getExportData()
+{
 	const tableRows = $("#tasklist").children();
 	const taskRows = tableRows.filter(".task");
   let taskData = "";
   let rowData;
-  for (let i = 0; i < taskRows.length; i++) {
+  for (let i = 0; i < taskRows.length; i++)
+  {
     rowData = getRowData($(taskRows[i]));
-    if (i == 0) {
+    if (i == 0)
+    {
       taskData = taskData.concat(rowData);
-    } else {
+    } else
+    {
       rowData = "\n".concat(rowData);
       taskData = taskData.concat(rowData);
     }
@@ -1026,13 +1215,15 @@ function getExportData() {
   return taskData;
 }
 
-function getImportData() {
+function getImportData()
+{
   const data = $("#import-area").val();
   return data;
 }
 
 // our input here is a closed task row
-function getRowData(obj) {
+function getRowData(obj)
+{
   const displayMode = $("body").data("displayMode");
   let rowData = "";
   // grab the individual task boxes
@@ -1041,9 +1232,12 @@ function getRowData(obj) {
   const difficultyBox = $(rowKids[0]);
   const difficultyKids = difficultyBox.children();
   let difficulty;
-  if (displayMode == "text") {
+  if (displayMode == "text")
+  {
     difficulty = $(difficultyKids[1]).text();
-  }  else {
+  }
+  else
+  {
     difficulty = $(difficultyKids[1]).attr("title");
   };
   const difficultyVal = parseSpoon(difficulty);
@@ -1051,9 +1245,12 @@ function getRowData(obj) {
   const doneBox = $(rowKids[1]);
   const doneCheckBox = $(doneBox.children()[1]);
   let doneBoxVal;
-  if (doneCheckBox.prop("checked")) {
+  if (doneCheckBox.prop("checked"))
+  {
     doneBoxVal = 1;
-  } else {
+  }
+  else
+  {
     doneBoxVal = 0;
   }
   // what's the task's name?
@@ -1063,19 +1260,24 @@ function getRowData(obj) {
   // what are the individual spoon values?
   const spoon = rowKids.filter(".spoon");
   let spoonList = [];
-  for (let i = 0; i < spoon.length; i++) {
+  for (let i = 0; i < spoon.length; i++)
+  {
     // get the spoon value
     let spoonKids = $(spoon[i]).children();
     let spoonVal;
-    if (displayMode == "text") {
+    if (displayMode == "text")
+    {
       spoonVal = parseSpoon($(spoonKids[1]).text());
-    } else {
+    }
+    else
+    {
       spoonVal = parseSpoon($(spoonKids[1]).attr("title"));
     }
     spoonList.push(spoonVal);
   }
   rowData = difficultyVal + "," + doneBoxVal + "," + taskName;
-  for (let j = 0; j < spoonList.length; j++) {
+  for (let j = 0; j < spoonList.length; j++)
+  {
     rowData = rowData.concat(",");
     rowData = rowData.concat(spoonList[j]);
   }
@@ -1089,22 +1291,26 @@ function importTaskList(s) {
 }
 
 // our input here is a string with the task data in it - returns a list of task data
-function importTask(s) {
+function importTask(s)
+{
   let data = s.split(",");
   return data;
 }
 
 // our input is an array of arrays
-function validateTaskList(a) {
+function validateTaskList(a)
+{
   let r = [];
   let failed = []
-  for (let i = 0; i < a.length; i++) {
+  for (let i = 0; i < a.length; i++)
+  {
     let toTest = importTask(a[i]);
     let isValid = validateTask(toTest);
     if (isValid[1]) {
       r.push(isValid[0]);
     }
-    else {
+    else
+    {
       failed.push(isValid[0]);
     }
   }
@@ -1112,18 +1318,23 @@ function validateTaskList(a) {
 }
 
 // validates an individual task
-function validateTask(a) {
+function validateTask(a)
+{
   let v = true;
   const overallSpoon = (validateSpoon(a[0]));
-  if (overallSpoon === false) {
+  if (overallSpoon === false)
+  {
       v = false;
   }
-  if (validateDone === false) {
+  if (validateDone === false)
+  {
     v = false;
   }
-  for (let i = 3; i < a.length; i++) {
+  for (let i = 3; i < a.length; i++)
+  {
     let thisSpoon = validateSpoon(a[i]);
-    if (thisSpoon === false) {
+    if (thisSpoon === false)
+    {
       v = false;
     }
   }
@@ -1135,25 +1346,37 @@ function validateTask(a) {
 }
 
 // validates a spoon value, which should be a digit between 0 and 4
-function validateSpoon(spoon) {
+function validateSpoon(spoon)
+{
   const int = parseInt(spoon);
-  if (isNaN(int)) {
+  if (isNaN(int))
+  {
     return false;
-  } else if (int >= 0 && int <= 4) {
+  }
+  else if (int >= 0 && int <= 4)
+  {
     return int;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
 
 // validates a done value, which should be 0 or 1
-function validateDone(done) {
+function validateDone(done)
+{
   const int = parseInt(done);
-  if (isNaN(int)) {
+  if (isNaN(int))
+  {
     return false;
-  } else if (int == 0 || int == 1) {
+  }
+  else if (int == 0 || int == 1)
+  {
     return int;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
@@ -1161,7 +1384,8 @@ function validateDone(done) {
 // -- ERROR HANDLING
 
 // creates an error message with an OK button to remove it
-function error(s,obj) {
+function error(s, obj)
+{
   if ($("#error").length == 0) {
     const div = $("<div></div>");
     div.addClass("error");
@@ -1178,19 +1402,22 @@ function error(s,obj) {
     div.append(button);
     obj.append(div);
   }
-  else {
+  else
+  {
     let errorTextSpan = $("#error-text");
     setHTML(errorTextSpan,s);
   }
 }
 
 // removes an error message when you click OK
-function errorOkHandler(obj) {
+function errorOkHandler(obj)
+{
   const div = $(obj).parent();
   div.remove();
 }
 
-function buildImportErrorString(x) {
+function buildImportErrorString(x)
+{
   let s;
   let task = x > 1? x.toString() + " tasks" : "task";
   s = "The " + task + " above could not be imported.";
@@ -1198,17 +1425,22 @@ function buildImportErrorString(x) {
 }
 
 // builds the error string for when you try to import invalid tasks
-function buildErrorImportVal(l) {
+function buildErrorImportVal(l)
+{
   let s = "";
-  for (let i = 0; i < l.length; i++) {
+  for (let i = 0; i < l.length; i++)
+  {
     let stringPart = "";
-    for (let j = 0; j < l[i].length; j++) {
-      if (j > 0) {
+    for (let j = 0; j < l[i].length; j++)
+    {
+      if (j > 0)
+      {
         stringPart += ",";
       }
       stringPart += l[i][j];
     }
-    if (i > 0) {
+    if (i > 0)
+    {
       s += "\n";
     }
     s += stringPart;
@@ -1219,21 +1451,31 @@ function buildErrorImportVal(l) {
 // -- SPOON PARSING
 
 // set a traffic light emoji (for spoon counts in emoji mode)
-function trafficLightSpan(val,l) {
+function trafficLightSpan(val, l)
+{
 	const span = makeSpan();
-	if (val == 4) {
+	if (val == 4)
+  {
 		span.html(l[0]);
 		span.attr("title","very high");
-	} else if (val == 3) {
+	}
+  else if (val == 3)
+  {
 		span.html(l[1]);
 		span.attr("title","high");
-	} else if (val == 2) {
+	}
+  else if (val == 2)
+  {
 		span.html(l[2]);
 		span.attr("title","medium");
-	} else if (val == 1) {
+	}
+  else if (val == 1)
+  {
 		span.html(l[3]);
 		span.attr("title","low");
-	} else {
+	}
+  else
+  {
 		span.html(l[4]);
 		span.attr("title","none");
 	};
@@ -1241,75 +1483,110 @@ function trafficLightSpan(val,l) {
 };
 
 // assign a points value based on a spoon count
-function parseSpoon(val) {
-	if (val == "very high") {
+function parseSpoon(val)
+{
+	if (val == "very high")
+  {
 		return 4;
-	} else if (val == "high") {
+	}
+  else if (val == "high")
+  {
 		return 3;
-	} else if (val == "medium") {
+	}
+  else if (val == "medium")
+  {
 		return 2;
-	} else if (val == "low") {
+	}
+  else if (val == "low")
+  {
 		return 1;
-	} else {
+	}
+  else
+  {
 		return 0;
 	}
 }
 
 // takes a numeric input and returns the text value of its difficulty
-function reverseSpoon(val) {
-  if (val === 4) {
+function reverseSpoon(val)
+{
+  if (val === 4)
+  {
     return "very high";
-  } else if (val === 3) {
+  }
+  else if (val === 3)
+  {
     return "high";
-  } else if (val === 2) {
+  }
+  else if (val === 2)
+  {
     return "medium";
-  } else if (val === 1) {
+  }
+  else if (val === 1)
+  {
     return "low";
-  } else {
+  }
+  else {
     return "none";
   }
 }
 
 // test if a number is equal to a specified value (for difficulty setting purposes)
-function isFour(val) {
-	if (val == 4) {
+function isFour(val)
+{
+	if (val == 4)
+  {
 		return true;
 	}
 	return false;
 }
 
-function isThree(val) {
-	if (val == 3) {
+function isThree(val)
+{
+	if (val == 3)
+  {
 		return true;
 	}
 	return false;
 }
 
-function isTwo(val) {
-	if (val == 2) {
+function isTwo(val)
+{
+	if (val == 2)
+  {
 		return true;
 	}
 	return false;
 }
 
-function isOne(val) {
-	if (val == 1) {
+function isOne(val)
+{
+	if (val == 1)
+  {
 		return true;
 	}
 	return false;
 }
 
 // assign an overall spoon cost from a list of spoon costs
-function parseSpoonCost(val,l) {
-	if (l.find(isFour) || val >= 15) {
+function parseSpoonCost(val, l) 
+{
+	if (l.find(isFour) || val >= 15)
+  {
 		return "very high";
-	} else if (l.find(isThree) || val >= 10) {
+	}
+  else if (l.find(isThree) || val >= 10)
+  {
 		return "high";
-	} else if (l.find(isTwo) || val >= 5) {
+	}
+  else if (l.find(isTwo) || val >= 5)
+  {
 		return "medium";
-	} else if (l.find(isOne)) {
+	}
+  else if (l.find(isOne)) {
 		return "low";
-	} else {
+	}
+  else {
 		return "none";
 	}
 }
@@ -1317,32 +1594,45 @@ function parseSpoonCost(val,l) {
 // add all the values of a list
 function sumList(l) {
 	let i;
-	let j = 0;
-	for (i = 0; i < l.length; i++) {
-		j += l[i];
+	let sum = 0;
+	for (i = 0; i < l.length; i++)
+  {
+		sum += l[i];
 	}
-	return j;
+	return sum;
 }
 
 // sets a background colour based on a spoon count (for text mode)
-function setSpoonColour(val) {
-	if (val == 4) {
+function setSpoonColour(val)
+{
+	if (val == 4)
+  {
 		return "mediumpurple";
-	} else if (val == 3) {
+	}
+  else if (val == 3)
+  {
 		return "#ff3030";
-	} else if (val == 2) {
+	}
+  else if (val == 2)
+  {
 		return "#ffec8b";
-	} else if (val == 1) {
+	}
+  else if (val == 1)
+  {
 		return "mediumspringgreen";
-	} else {
+	}
+  else
+  {
 		return "";
 	}
 }
 
 // returns the right version of executive function for display
-function parseSpoonName(s) {
+function parseSpoonName(s)
+{
   let parsed;
-  if (s === "executive-function") {
+  if (s === "executive-function")
+  {
     parsed = "executive function";
   } else {
     parsed = s;
@@ -1353,9 +1643,11 @@ function parseSpoonName(s) {
 // -- HTML WRANGLING
 
 // crates a table header
-function makeTableHead(val = "") {
+function makeTableHead(val = "")
+{
   const th = $("<th></th>");
-  if (val) {
+  if (val)
+  {
     th.addClass(val);
   }
   return th;
@@ -1363,7 +1655,8 @@ function makeTableHead(val = "") {
 
 // create a difficulty header
 // nb: this assumes text mode and I probably shouldn't
-function makeDifficultyHead() {
+function makeDifficultyHead()
+{
   const head = makeTableHead("difficultyhead");
   setText(head,"difficulty");
   return head;
@@ -1371,14 +1664,16 @@ function makeDifficultyHead() {
 
 // create a done header
 // refactor for emoji mode later
-function makeDoneHead() {
+function makeDoneHead()
+{
   const head = makeTableHead("donehead");
   setText(head,"done?");
   return head;
 }
 
 // create a task name header
-function makeNameHead() {
+function makeNameHead()
+{
   const head = makeTableHead("namehead");
   setText(head,"task");
   return head;
@@ -1386,9 +1681,11 @@ function makeNameHead() {
 
 // create spoon name headers
 // returns an array of header objects
-function makeSpoonHeads(a) {
+function makeSpoonHeads(a)
+{
   let heads = [];
-  for (let i = 0; i < a.length; i++) {
+  for (let i = 0; i < a.length; i++)
+  {
     let head = makeSpoonHead(a[i]);
     heads.push(head);
   }
@@ -1396,7 +1693,8 @@ function makeSpoonHeads(a) {
 }
 
 // create individual spoon name headers
-function makeSpoonHead(s) {
+function makeSpoonHead(s)
+{
   const head = makeTableHead("spoonhead");
   head.addClass(s);
   setText(head,parseSpoonName(s));
@@ -1414,9 +1712,11 @@ function makeTableRow(val = "") {
 
 // makes a header row for the tasklist or archive table
 // TODO: account for emoji mode
-function makeTaskHeaderRow(s,spoonTypes) {
+function makeTaskHeaderRow(s,spoonTypes)
+{
   const row = makeTableRow("header");
-  if (s === "tasklist") {
+  if (s === "tasklist")
+  {
     row.attr("id", "taskhead");
   }
   const difficultyHead = makeDifficultyHead();
@@ -1424,14 +1724,16 @@ function makeTaskHeaderRow(s,spoonTypes) {
   const nameHead = makeNameHead();
   const spoonHeads = makeSpoonHeads(spoonTypes);
   row.append(difficultyHead,doneHead,nameHead);
-  for (let i = 0; i < spoonHeads.length; i++) {
+  for (let i = 0; i < spoonHeads.length; i++)
+  {
     row.append(spoonHeads[i]);
   }
   return row;
 }
 
 // makes a new task row for the tasklist or archive table
-function makeNewTaskRow(spoonTypes,spoonDifficulties) {
+function makeNewTaskRow(spoonTypes,spoonDifficulties)
+{
   const row = makeTableRow("newtask");
   const difficultyBox = makeNewTaskDifficulty();
   const doneBox = makeNewTaskDone();
@@ -1439,7 +1741,8 @@ function makeNewTaskRow(spoonTypes,spoonDifficulties) {
   const spoonBoxes = makeNewTaskSpoons(spoonTypes,spoonDifficulties);
   const addBox = makeNewTaskAdd();
   row.append(difficultyBox,doneBox,nameBox);
-  for (let i = 0; i < spoonBoxes.length; i++) {
+  for (let i = 0; i < spoonBoxes.length; i++)
+  {
     row.append(spoonBoxes[i]);
   }
   row.append(addBox);
@@ -1447,26 +1750,31 @@ function makeNewTaskRow(spoonTypes,spoonDifficulties) {
 }
 
 // creates a table cell
-function makeTableCell(val = "") {
+function makeTableCell(val = "")
+{
 	const td = $("<td></td>");
-  if (val) {
+  if (val)
+  {
     td.addClass(val);
   }
 	return td;
 }
 
 // makes the difficulty cell for a new task row
-function makeNewTaskDifficulty() {
+function makeNewTaskDifficulty()
+{
   const cell = makeTableCell("difficulty");
   return cell;
 }
 
-function makeNewTaskDone() {
+function makeNewTaskDone()
+{
   const cell = makeTableCell("done");
   return cell;
 }
 
-function makeNewTaskName() {
+function makeNewTaskName()
+{
   const cell = makeTableCell("name");
   const screenReaderName = makeScreenReaderSpan("task name");
   const textInput = makeTextInput();
@@ -1474,16 +1782,19 @@ function makeNewTaskName() {
   return cell;
 }
 
-function makeNewTaskSpoons(spoonTypes,spoonDifficulties) {
+function makeNewTaskSpoons(spoonTypes,spoonDifficulties)
+{
   let cells = [];
-  for (let i = 0; i < spoonTypes.length; i++) {
+  for (let i = 0; i < spoonTypes.length; i++)
+  {
     let cell = makeNewTaskSpoon(spoonTypes[i],spoonDifficulties);
     cells.push(cell);
   }
   return cells;
 }
 
-function makeNewTaskSpoon(s,spoonDifficulties) {
+function makeNewTaskSpoon(s,spoonDifficulties)
+{
   const cell = makeTableCell("spoon");
   cell.addClass(s);
   const spoonName = parseSpoonName(s);
@@ -1497,7 +1808,8 @@ function makeNewTaskSpoon(s,spoonDifficulties) {
   return cell;
 }
 
-function makeNewTaskAdd() {
+function makeNewTaskAdd()
+{
   const cell = makeTableCell("changetask");
   const button = makeButton("Add");
   button.addClass("savenewtask");
@@ -1506,14 +1818,16 @@ function makeNewTaskAdd() {
 }
 
 // creates a table
-function makeTable() {
+function makeTable()
+{
 	const table = $("<table></table>");
 	return table;
 }
 
 // this is a kludge for now
 // sets the width of all spoon cells to be the same as the first one
-function setSpoonWidths(table) {
+function setSpoonWidths(table)
+{
   const kids = $(table.children());
   const row = $(kids[0]);
   const cells = $(row.children());
@@ -1523,43 +1837,56 @@ function setSpoonWidths(table) {
 }
 
 // creates a selector from a list
-function selectorWithBlank(l) {
+function selectorWithBlank(l)
+{
 	const selector = $("<select></select>");
-	const blankOption = $("<option></option>", {
-		value: "blank"
-	});
+	const blankOption = $
+  (
+    "<option></option>",
+    {
+		  value: "blank"
+	  }
+  );
 	selector.append(blankOption);
 	let i;
-	for (i = 0; i < l.length; i++) {
-		let newOption = $("<option></option>", {
+	for (i = 0; i < l.length; i++)
+  {
+		let newOption = $
+    ("<option></option>",
+     {
 			text: l[i],
 			value: l[i]
-		});
+		  }
+    );
 		selector.append(newOption);
 	}
 	return selector;
 }
 
 // creates a span
-function makeSpan() {
+function makeSpan()
+{
 	const span = $("<span></span>");
 	return span;
 }
 
 // creates a hidden span
-function makeScreenReaderSpan() {
+function makeScreenReaderSpan()
+{
 	const span = makeSpan();
 	span.addClass("hidden");
 	return span;
 }
 
 // clears the value of a jquery object
-function clearVal(obj) {
+function clearVal(obj)
+{
   obj.val("");
 }
 
 // sets the value of a jquery object
-function setVal(obj,val) {
+function setVal(obj,val)
+{
   obj.val(val);
 }
 
@@ -1569,12 +1896,14 @@ function setHTML(obj,val) {
 }
 
 // sets the text attribute of a jquery object
-function setText(obj,val) {
+function setText(obj,val)
+{
   obj.text(val);
 }
 
 // makes a button
-function makeButton(text) {
+function makeButton(text)
+{
   const button = $("<button></button>");
   button.val(text);
   button.html(text);
@@ -1582,7 +1911,8 @@ function makeButton(text) {
 }
 
 // makes a link
-function makeLink(text,href) {
+function makeLink(text,href)
+{
   const link = $("<a href='" + href+ "'>" + text + "</a>");
   link.text = text;
   link.href = href;
@@ -1590,7 +1920,8 @@ function makeLink(text,href) {
 }
 
 // makes a blank text input box
-function makeTextInput() {
+function makeTextInput()
+{
   const textInput = $("<input></input>", {
 		  type: "text"
 	});
@@ -1598,7 +1929,8 @@ function makeTextInput() {
 }
 
 // gets the grandparent of a jquery object
-function getGrandparent(obj) {
+function getGrandparent(obj)
+{
   const grandparent = obj.parent().parent();
   return grandparent;
 }
