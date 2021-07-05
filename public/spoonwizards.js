@@ -178,8 +178,7 @@ function clearNewTaskRow(obj)
   const taskNameInput = $(taskNameBox.children()[1]);
   clearVal(taskNameInput);
   const spoon = kids.filter(".spoon");
-  let i;
-  for (i = 0; i < spoon.length; i++) {
+  for (let i = 0; i < spoon.length; i++) {
     let spoonBox = $(spoon[i]);
     let spoonForm = $(spoonBox.children()[1]);
     setVal(spoonForm,"blank");
@@ -365,8 +364,7 @@ function editButtonHandler(obj)
 	const highOptionSelected = "<option value='high' selected='selected'>high</option>";
 	const veryHighOption = "<option value='very high'>very high</option>";
 	const veryHighOptionSelected = "<option value='very high' selected='selected'>very high</option>";
-	let i;
-	for (i = 0; i < spoon.length; i++)
+	for (let i = 0; i < spoon.length; i++)
   {
 		let spoonSelector = $("<select></select>");
 		let classes = spoon[i].classList;
@@ -616,8 +614,7 @@ function changeSettingHandler(obj)
 		// change the done? header
 		doneHeader.html("done?");
 		// loop over our spoon headers and change them
-		let i;
-		for (i = 0; i < spoonHeaders.length; i++)
+		for (let i = 0; i < spoonHeaders.length; i++)
     {
 			let thisSpoon = spoonHeaders[i];
 			let spoonType = thisSpoon.classList[1];
@@ -627,8 +624,7 @@ function changeSettingHandler(obj)
 			$(thisSpoon).html(spoonType);
 		}
 		// replace emojis in the task rows with text
-		let j;
-		for (j = 0; j < taskRows.length; j++)
+		for (let j = 0; j < taskRows.length; j++)
     { // iterating over the tasks
 			let row = $(taskRows[j]);
 			let rowKids = row.children();
@@ -646,8 +642,7 @@ function changeSettingHandler(obj)
 			difficultyBox.css("background-color", spoonColour);
 			// convert each invididual spoon to text
 			let spoon = rowKids.filter(".spoon");
-			let k;
-			for (k = 0; k < spoon.length; k++)
+			for (let k = 0; k < spoon.length; k++)
       {
 				let spoonBox = $(spoon[k]);
 				let spoonSpan = $(spoonBox.children()[1]);
@@ -709,8 +704,7 @@ function changeSettingHandler(obj)
 		doneHeader.html(doneScreenReaderHeadSpan);
 		doneHeader.append(doneHeadSpan);
 		// loop over our spoon headers and change them
-		let l;
-		for (l = 0; l < spoonHeaders.length; l++)
+		for (let l = 0; l < spoonHeaders.length; l++)
     {
 			let thisSpoon = spoonHeaders[l];
 			let spoonType = thisSpoon.classList[2];
@@ -731,8 +725,7 @@ function changeSettingHandler(obj)
 			$(thisSpoon).append(spoonHeadSpan);
 		}
 		// replace text in the task rows with emojis
-		let m;
-		for (m = 0; m < taskRows.length; m++)
+		for (let m = 0; m < taskRows.length; m++)
     {
 			let row = $(taskRows[m]);
 			let rowKids = row.children();
@@ -750,8 +743,7 @@ function changeSettingHandler(obj)
 			difficultyBox.css("background-color","");
 			// put emojis in the spoon count rows
 			let spoon = rowKids.filter(".spoon");
-			let n;
-			for (n = 0; n < spoon.length; n++)
+			for (let n = 0; n < spoon.length; n++)
       {
 				let spoonBox = $(spoon[n]);
 				let spoonSpan = $(spoonBox.children()[1]);
@@ -1140,8 +1132,7 @@ function getNewTaskData(row)
   // set an overall difficulty for the task
 	const spoon = kids.filter(".spoon");
 	let spoonValList = [];
-	let i;
-	for (i = 0; i < spoon.length; i++) {
+	for (let i = 0; i < spoon.length; i++) {
 		let spoonForm = $(spoon[i]).children();
 		let spoonVal = $(spoonForm[1]).val();
 		spoonValList.push(parseSpoon(spoonVal));
@@ -1171,9 +1162,8 @@ function getNewTaskData(row)
 	const taskNameInput = $(grandkids[1]);
 	const taskName = taskNameInput.val();
 	// spoon counts
-	let j;
   let spoonCosts = [];
-	for (j = 0; j < spoon.length; j++)
+	for (let j = 0; j < spoon.length; j++)
   {
 		let newSpoonBox = makeTableCell();
 		let spoonForm = $(spoon[j]).children();
@@ -1593,9 +1583,8 @@ function parseSpoonCost(val, l)
 
 // add all the values of a list
 function sumList(l) {
-	let i;
 	let sum = 0;
-	for (i = 0; i < l.length; i++)
+	for (let i = 0; i < l.length; i++)
   {
 		sum += l[i];
 	}
@@ -1848,8 +1837,7 @@ function selectorWithBlank(l)
 	  }
   );
 	selector.append(blankOption);
-	let i;
-	for (i = 0; i < l.length; i++)
+	for (let i = 0; i < l.length; i++)
   {
 		let newOption = $
     ("<option></option>",
