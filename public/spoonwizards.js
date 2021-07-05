@@ -1034,7 +1034,7 @@ function importSubmitHandler(obj)
 // tasks should be pre-validated
 function addImportedTaskList(a)
 {
-  for (let i = 0; i < a.length; i++)
+  for (let i = a.length - 1; i >= 0; i--) // iterate backwards over the list so we don't keep reversing it
   {
     addImportedTask(a[i]);
   }
