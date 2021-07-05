@@ -53,7 +53,6 @@ $(document).ready(
 		  changeSettingHandler(this);
 	    }
     );
-    console.log(tasksExist());
   }
 );
 
