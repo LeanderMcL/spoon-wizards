@@ -240,6 +240,17 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
 	newRow.append(doneBox);
   // add the task name
   const nameBox = makeTableCell("tasknamebox");
+  const taskIdSpan = makeSpan();
+  taskIdSpan.addClass("taskid");
+  const taskIdInput = $
+  (
+    "<input></input>",
+    {
+      type: "hidden"
+    }
+  );
+  setVal(taskIdInput, taskID);
+  taskIdSpan.append(taskIdInput);
   const taskNameScreenReaderSpan = makeScreenReaderSpan();
   setText(taskNameScreenReaderSpan,"task name");
   const taskNameSpan = makeSpan();
@@ -249,6 +260,7 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
   {
     nameBox.addClass("completed");
   }
+  nameBox.append(taskIdSpan);
   nameBox.append(taskNameScreenReaderSpan);
   nameBox.append(taskNameSpan);
   newRow.append(nameBox);
@@ -335,7 +347,6 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
   newRow.append(archiveButtonBox);
   // finally, stick the new row on the table
   const firstTask = tasksExist();
-  console.log(firstTask);
   if (firstTask)
   {
     firstTask.before(newRow);
@@ -344,7 +355,6 @@ function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
   {
     table.append(newRow);
   }
-  console.log(tasksExist());
 }
 
 // -- EDITING TASKS --
@@ -1947,6 +1957,14 @@ function getGrandparent(obj)
 {
   const grandparent = obj.parent().parent();
   return grandparent;
+}
+
+// -- DEBUG FUNCTIONS --
+
+// logs all task data to the console
+function logTaskData()
+{
+  console.log($("body").data().tasks);
 }
 
 // -- BASIC DATA --
