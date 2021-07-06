@@ -367,8 +367,8 @@ function editButtonHandler(obj)
 	const kids = dad.children();
 	// change the task name field back to an input box
 	const taskNameBox = $(kids[2]);
-	const taskNameSpan = $(taskNameBox.children()[1]);
-	const taskName = $(taskNameBox.children()[1]).html();
+	const taskNameSpan = $(taskNameBox.children()[2]);
+	const taskName = $(taskNameBox.children()[2]).html();
 	const taskNameInput = $("<input></input>", {
 		value: taskName
 	});
@@ -487,7 +487,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis)
   difficultyBox.append(spoonCostSpan);
   // update the task name
   const taskNameBox = $(kids.filter(".tasknamebox")[0]);
-	const taskNameInput = $(taskNameBox.children()[1]);
+	const taskNameInput = $(taskNameBox.children()[2]);
 	const taskName = task.name;
 	const taskNameSpan = makeSpan();
   setText(taskNameSpan,taskName)
@@ -548,7 +548,7 @@ function deleteButtonHandler(obj)
 	const dad = getGrandparent($(obj));
 	const kids = dad.children();
 	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
-	const taskName = $(taskNameBox.children()[1]).html();
+	const taskName = $(taskNameBox.children()[2]).html();
 	const confirmString = "Really delete " + taskName + "?";
 	const r = confirm(confirmString);
 	if (r == true)
@@ -1181,7 +1181,15 @@ function getNewTaskData(row)
   // add the task name
 	const taskNameBox = $(kids[2]);
 	const grandkids = taskNameBox.children();
-	const taskNameInput = $(grandkids[1]);
+  let taskNameInput;
+  if (grandkids.length == 2)
+  {
+    taskNameInput = $(grandkids[1]);
+  }
+  else
+  {
+    taskNameInput = $(grandkids[2]);
+  }
 	const taskName = taskNameInput.val();
 	// spoon counts
   let spoonCosts = [];
