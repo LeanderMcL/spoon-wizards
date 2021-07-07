@@ -457,14 +457,17 @@ function saveEditedTaskButtonHandler(obj)
 	const dad = getGrandparent($(obj));
 	const kids = dad.children();
   const taskData = getNewTaskData(dad);
+  const taskID = getSavedTaskID(dad);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
-  updateTask(dad,displayMode,taskObject,homeSpoonList,homeSpoonEmoji);
+  updateTask(dad,displayMode,taskID,taskObject,homeSpoonList,homeSpoonEmoji);
 }
 
 // updates an edited task
 // TBD: update the edited tasks in the DOM, reliant on bug #37
-function updateTask(row,displayMode,task,spoonTypes,spoonEmojis)
+function updateTask(row,displayMode,taskID,task,spoonTypes,spoonEmojis)
 {
+  // update the task data in the DOM
+  saveTaskData(taskID,task);
   const kids = row.children();
   // update the overall difficulty
   const difficultyBox = $(kids.filter(".difficultybox")[0]);
@@ -538,6 +541,7 @@ function updateTask(row,displayMode,task,spoonTypes,spoonEmojis)
   );
 	editButton.addClass("edittask");
 	editButtonBox.html(editButton);
+  logTaskData();
 }
 
 // -- REMOVING TASKS
@@ -1657,6 +1661,23 @@ function parseSpoonName(s)
     parsed = s;
   }
   return parsed;
+}
+
+// -- TASK READING AND WRITING
+
+// returns the task ID of a saved task
+function getSavedTaskID(row)
+{
+  const nameBox = getNameBox(row);
+  const taskIDSpan = $(nameBox.children().filter(".taskid")[0]);
+  const taskID = $(taskIDSpan.children()[0]).val();
+  return taskID;
+}
+
+// returns the name box of a saved task
+function getNameBox(row)
+{
+  return $(row.children().filter(".tasknamebox")[0])
 }
 
 // -- HTML WRANGLING
