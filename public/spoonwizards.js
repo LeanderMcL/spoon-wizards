@@ -40,6 +40,7 @@ $(document).ready(
     buildTitle();
     buildOptions();
 	  buildTaskList();
+    buildArchive();
 	  const table = $("#tasklist");
 	  $(".savenewtask").click(
       function()
@@ -148,6 +149,24 @@ function buildTaskList()
 	const newTaskRow = makeNewTaskRow(spoonTypes,spoonDifficulties);
 	taskList.append(newTaskRow);
 	setSpoonWidths(taskList);
+}
+
+// builds the archive table
+// this is hidden by default
+function buildArchive()
+{
+  const body = $("body");
+  const spoonTypes = body.data("spoonTypes");
+  const spoonEmoji = body.data("spoonEmoji");
+  const spoonDifficulties = body.data("spoonDifficulties");
+  // create the archive
+  const archive = makeTable();
+  archive.attr("id", "archive");
+  body.append(archive);
+  const headerRow = makeTaskHeaderRow("archive", spoonTypes); // will probably need header emojis later
+  archive.append(headerRow);
+  setSpoonWidths(archive);
+  archive.hide();
 }
 
 // -- ADDING TASKS --
@@ -1769,15 +1788,21 @@ function makeTableRow(val = "") {
 function makeTaskHeaderRow(s,spoonTypes)
 {
   const row = makeTableRow("header");
+  const difficultyHead = makeDifficultyHead();
+  const nameHead = makeNameHead();
+  const spoonHeads = makeSpoonHeads(spoonTypes);
+  let doneHead;
   if (s === "tasklist")
   {
     row.attr("id", "taskhead");
+    doneHead = makeDoneHead();
+    row.append(difficultyHead,doneHead,nameHead);
   }
-  const difficultyHead = makeDifficultyHead();
-  const doneHead = makeDoneHead();
-  const nameHead = makeNameHead();
-  const spoonHeads = makeSpoonHeads(spoonTypes);
-  row.append(difficultyHead,doneHead,nameHead);
+  else if (s === "archive")
+  {
+    row.attr("id", "archivehead");
+    row.append(difficultyHead,nameHead);
+  }
   for (let i = 0; i < spoonHeads.length; i++)
   {
     row.append(spoonHeads[i]);
