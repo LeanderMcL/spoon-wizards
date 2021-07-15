@@ -1330,7 +1330,7 @@ function getRowData(obj)
   // what's the task's name?
   const taskNameBox = $(rowKids[2]);
   const taskNameKids = taskNameBox.children();
-  const taskName = $(taskNameKids[1]).text();
+  const taskName = $(taskNameKids[2]).text();
   // what are the individual spoon values?
   const spoon = rowKids.filter(".spoon");
   let spoonList = [];
@@ -1453,6 +1453,12 @@ function validateDone(done)
   {
     return false;
   }
+}
+
+// update the tasklist or archive table with data from the DOM
+function updateTable(s)
+{
+  
 }
 
 // -- ERROR HANDLING
@@ -1711,6 +1717,33 @@ function parseSpoonName(s)
     parsed = s;
   }
   return parsed;
+}
+
+// TASK VIEWS
+
+// this should change the view between task and archive view
+function changeView()
+{
+  // stuff
+  // basically: determine which view is required and call taskView or archiveView()
+}
+
+// this should implement the task view
+function taskView()
+{
+  // stuff
+  // first, update the tasklist with data from the DOM
+  // hide the archive
+  // show the tasklist
+}
+
+// this should implement the archive view
+function archiveView()
+{
+  // stuff
+  // first, update the archive with data from the DOM
+  // hide the tasklist
+  // show the archive
 }
 
 // -- TASK READING AND WRITING
