@@ -39,6 +39,7 @@ $(document).ready(
     buildSettings();
     buildTitle();
     buildOptions();
+    buildViews();
 	  buildTaskList();
     buildArchive();
 	  const table = $("#tasklist");
@@ -80,7 +81,8 @@ function buildSettings()
 	    href: "javascript:void(0)",
 	    id: "emoji",
 	    html: "emoji",
-    });
+    }
+                     );
   emojiLink.addClass("setting");
   emojiLink.addClass("display-mode");
   container.append(textSetting);
@@ -130,6 +132,35 @@ function buildOptions()
   para.append(container);
   body.append(para);
 };
+
+// builds our different views for tasks
+function buildViews()
+{
+  const body = $("body");
+  const para = $("<p></p>");
+  const container = makeSpan();
+  const taskSetting = makeSpan();
+  para.addClass("views");
+  para.attr("id", "views-para");
+  container.addClass("views");
+  container.addClass("views-container");
+  taskSetting.addClass("view");
+  taskSetting.addClass("id", "tasks");
+  taskSetting.text("tasks");
+  const archiveLink = $("<a></a>",
+    {
+      href: "javascript:void(0)",
+      id: "archive",
+      html: "archive"
+    }
+                        );
+  archiveLink.addClass("view");
+  archiveLink.attr("id", "archive");
+  container.append(taskSetting);
+  container.append(" ", archiveLink);
+  para.append(container);
+  body.append(para);
+}
 
 // builds the task list table
 function buildTaskList()
