@@ -614,7 +614,21 @@ function deleteButtonHandler(obj)
 // respond to the Archive button
 function archiveButtonHandler(obj)
 {
-	alert("to be done!");
+  // grab spoon data
+  // note: this is all super messy, because I have backend stuff to fix
+  const row = getGrandparent($(obj));
+  const rowData = getRowData(row);
+  const dataList = importTask(rowData)
+  const spoonTypes = $("body").data("spoonTypes");
+  const spoonData = buildSpoonList(spoonTypes,dataList.slice(3));
+  const taskObj = buildTaskData(dataList[0],dataList[1],dataList[2],spoonData);
+  const taskID = getSavedTaskID(row);
+  // remove the task from the active tasks in the DOM
+  removeTaskData("tasklist", taskID);
+  // save the task into the archive
+  saveArchiveData(taskID, taskObj);
+  // get rid of the task row
+  row.remove();
 }
 
 // -- COMPLETING TASKS
@@ -1164,6 +1178,7 @@ function initialiseTaskData()
 // builds data for a specific task
 function buildTaskData(difficulty, done, name, spoons)
 {
+  console.log(spoons);
   const taskData = { };
   taskData.name = name;
   taskData.difficulty = difficulty;
@@ -1191,6 +1206,13 @@ function saveTaskData(id,obj)
   const data = $("body").data();
   const activeTasks = data.tasks.active;
   activeTasks[id] = obj;
+}
+
+function saveArchiveData(id,obj)
+{
+  const data = $("body").data();
+  const archive = data.tasks.archive;
+  archive[id] = obj;
 }
 
 // assign an ID number
@@ -1458,7 +1480,7 @@ function validateDone(done)
 // update the tasklist or archive table with data from the DOM
 function updateTable(s)
 {
-  
+  // stuff
 }
 
 // -- ERROR HANDLING
@@ -1719,7 +1741,21 @@ function parseSpoonName(s)
   return parsed;
 }
 
-// TASK VIEWS
+// this takes some types and values and returns a spoon list for using elsewhere
+// TODO: make everything numeric so I don't need to do the reverseSpoon here
+function buildSpoonList(types,values)
+{
+  let data = [];
+  for (let i = 0; i < types.length; i++)
+  {
+    data[i] = [];
+    data[i][0] = types[i];
+    data[i][1] = reverseSpoon(parseInt(values[i]));
+  }
+  return data;
+}
+
+// -- TASK VIEWS
 
 // this should change the view between task and archive view
 function changeView()
@@ -1761,6 +1797,17 @@ function getSavedTaskID(row)
 function getNameBox(row)
 {
   return $(row.children().filter(".tasknamebox")[0])
+}
+
+function removeTaskData(s,id)
+{
+  const tasks = $("body").data().tasks;
+  console.log(tasks);
+  if (s === "tasklist")
+  {
+    console.log("task list");
+    delete tasks.active[id];
+  }
 }
 
 // -- HTML WRANGLING
