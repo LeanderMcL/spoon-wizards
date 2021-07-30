@@ -46,14 +46,20 @@ $(document).ready(
 	  $(".savenewtask").click(
       function()
       {
-		  saveNewTaskButtonHandler(this);
+		    saveNewTaskButtonHandler(this);
 	    }
     );
 	  $("a.setting").click(
       function()
       {
-		  changeSettingHandler(this);
+		    changeSettingHandler(this);
 	    }
+    );
+    $(".view").click(
+      function()
+      {
+        changeViewHandler(this);
+      }
     );
   }
 );
@@ -62,6 +68,8 @@ $(document).ready(
 
 // builds the settings paragraph
 // currently: the ability to switch between text and emoji mode
+// note: this assumes the user will always begin in text mode
+// this should be fixed later
 function buildSettings()
 {
   const body = $("body");
@@ -145,7 +153,7 @@ function buildViews()
   container.addClass("views");
   container.addClass("views-container");
   taskSetting.addClass("view");
-  taskSetting.addClass("id", "tasks");
+  taskSetting.attr("id", "tasks");
   taskSetting.text("tasks");
   const archiveLink = $("<a></a>",
     {
@@ -192,7 +200,7 @@ function buildArchive()
   const spoonDifficulties = body.data("spoonDifficulties");
   // create the archive
   const archive = makeTable();
-  archive.attr("id", "archive");
+  archive.attr("id", "archivelist");
   body.append(archive);
   const headerRow = makeTaskHeaderRow("archive", spoonTypes); // will probably need header emojis later
   archive.append(headerRow);
@@ -219,7 +227,8 @@ function saveNewTaskButtonHandler(obj)
   clearNewTaskRow(dad);
 	// put our newly generated row into the table
   // add our new task to the table
-  addTask(homeTable,displayMode,taskObject,homeTypesList,homeEmojiList);
+  const taskID = assignTaskID();
+  addTask(taskID, taskObject);
 };
 
 // clear the new task row
@@ -237,166 +246,34 @@ function clearNewTaskRow(obj)
   }
 }
 
+// TODO: merge these two functions, take the table as an argument
+
 // add a new task to the tasklist table
-function addTask(table,displayMode,task,spoonTypes,spoonEmojis)
+function addTask(taskID, task)
 {
+  const table = $("#tasklist");
   // assign the task a task ID
-  const taskID = assignTaskID();
   // add the task data to the DOM
   saveTaskData(taskID,task);
   // create a new row
-  const newRow = makeTableRow("task");
-  // overall task difficulty
-  const difficultyBox = makeTableCell("difficultybox");
-  const difficultyScreenReaderSpan = makeScreenReaderSpan("difficulty");
-  let spoonCostSpan;
-  if (displayMode == "text")
-  {
-    spoonCostSpan = makeSpan();
-    setText(spoonCostSpan,reverseSpoon(task.difficulty));
-    let difficultyBGColour = setSpoonColour(task.difficulty);
-    difficultyBox.css("background-color", difficultyBGColour);
-  }
-  else if (displayMode == "emoji")
-  {
-    spoonCostSpan = trafficLightSpan(task.difficulty,spoonEmojis);
-  }
-  // if neither of these ifs is true, I probably want to generate an error message and return here
-  difficultyBox.append(difficultyScreenReaderSpan);
-  difficultyBox.append(spoonCostSpan);
-  newRow.append(difficultyBox);
-  // add a checkbox so we can mark the task done
-	const doneBox = makeTableCell("donebox");
-	const doneScreenReaderSpan = makeScreenReaderSpan("done?");
-	doneBox.append(doneScreenReaderSpan);
-	const done = $
-  (
-    "<input></input>",
-    {
-		  type: "checkbox",
-		  on: {
-			click: function() {
-				 doneHandler(this);
-			}
-		 }
-	  }
-  );
-	done.addClass("done");
-  if (task.done) // could probably test this once rather than twice
-  {
-    done.prop("checked", true);
-  }
-	doneBox.append(done);
-	newRow.append(doneBox);
-  // add the task name
-  const nameBox = makeTableCell("tasknamebox");
-  const taskIdSpan = makeSpan();
-  taskIdSpan.addClass("taskid");
-  const taskIdInput = $
-  (
-    "<input></input>",
-    {
-      type: "hidden"
-    }
-  );
-  setVal(taskIdInput, taskID);
-  taskIdSpan.append(taskIdInput);
-  const taskNameScreenReaderSpan = makeScreenReaderSpan();
-  setText(taskNameScreenReaderSpan,"task name");
-  const taskNameSpan = makeSpan();
-  taskNameSpan.addClass("taskname");
-  setText(taskNameSpan,task.name);
-  if (task.done)
-  {
-    nameBox.addClass("completed");
-  }
-  nameBox.append(taskIdSpan);
-  nameBox.append(taskNameScreenReaderSpan);
-  nameBox.append(taskNameSpan);
-  newRow.append(nameBox);
-  // spoon counts
-  for (let i = 0; i < spoonTypes.length; i++)
-  {
-    let spoonBox = makeTableCell("spoon");
-    let spoonType = spoonTypes[i];
-    spoonBox.addClass(spoonType);
-    let spoonScreenReaderSpan = makeScreenReaderSpan(spoonType);
-    let spoonVal = task.spoons[spoonType];
-    let spoonName = reverseSpoon(spoonVal);
-    let spoonSpan;
-    if (displayMode == "text")
-    {
-      spoonSpan = makeSpan();
-      setText(spoonSpan,spoonName);
-      let spoonBGColour = setSpoonColour(spoonVal);
-      spoonBox.css("background-color", spoonBGColour);
-    }
-    else if (displayMode == "emoji")
-    {
-      spoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
-    }
-    spoonBox.append(spoonScreenReaderSpan);
-    spoonBox.append(spoonSpan);
-    newRow.append(spoonBox);
-  }
-  // add the edit button
-  const editButtonBox = makeTableCell("changetask");
-	const editButton = $
-  (
-    "<input></input>",
-    {
-		  type: "button",
-		  value: "Edit",
-		  on:
-      {
-			  click: function()
-        {
-				  editButtonHandler(this);
-			  }
-		  }
-		}
-  );
-	editButton.addClass("edittask");
-	editButtonBox.html(editButton);
-	newRow.append(editButtonBox);
-  // add the delete button (or archive button for completed tasks)
-  const deleteButtonBox = makeTableCell("removetask");
-	const deleteButton = $(
-    "<input></input>", 
-    {
-		  type: "button",
-		  value: "Delete",
-		  on:
-      {
-			  click: function()
-        {
-				  deleteButtonHandler(this);
-			  }
-		  }
-	  }
-  );
-  deleteButton.addClass("deletetask");
-  setHTML(deleteButtonBox,deleteButton);
-  const archiveButtonBox = makeTableCell("archivetask");
-  const archiveButton = $("<input></input>",
-    {
-		  type: "button",
-		  value: "Archive",
-		  on:
-      {
-			  click: function()
-        {
-				  archiveButtonHandler(this);
-			  }
-		  }
-	  }
-  );
-  archiveButton.addClass("archivetask");
-  setHTML(archiveButtonBox,archiveButton);
-	newRow.append(deleteButtonBox);
-  newRow.append(archiveButtonBox);
+  const newRow = makeTasklistRow(taskID, task);
   // finally, stick the new row on the table
-  const firstTask = tasksExist();
+  const firstTask = tasksExist("tasklist");
+  if (firstTask)
+  {
+    firstTask.before(newRow);
+  }
+  else
+  {
+    table.append(newRow);
+  }
+}
+
+function addArchiveTask(id, task)
+{
+  const table = $("#archivelist");
+  const newRow = makeArchivelistRow(id, task);
+  const firstTask = tasksExist("archive");
   if (firstTask)
   {
     firstTask.before(newRow);
@@ -617,18 +494,18 @@ function archiveButtonHandler(obj)
   // grab spoon data
   // note: this is all super messy, because I have backend stuff to fix
   const row = getGrandparent($(obj));
-  const rowData = getRowData(row);
-  const dataList = importTask(rowData)
-  const spoonTypes = $("body").data("spoonTypes");
-  const spoonData = buildSpoonList(spoonTypes,dataList.slice(3));
-  const taskObj = buildTaskData(dataList[0],dataList[1],dataList[2],spoonData);
   const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.active[taskID];
+  // set the task to not done
+  task.done = 0;
   // remove the task from the active tasks in the DOM
   removeTaskData("tasklist", taskID);
   // save the task into the archive
-  saveArchiveData(taskID, taskObj);
+  saveArchiveData(taskID, task);
   // get rid of the task row
   row.remove();
+  logTaskData();
 }
 
 // -- COMPLETING TASKS
@@ -1135,7 +1012,8 @@ function addImportedTask(a)
     spoonsProcessed.push([homeSpoonTypes[i], reverseSpoon(parseInt(spoonsRaw[i]))]);
   }
   const taskObject = buildTaskData(overallSpoon, done, name, spoonsProcessed);
-  addTask(homeTable,displayMode,taskObject,homeSpoonTypes,homeSpoonEmoji)
+  const taskID = assignTaskID();
+  addTask(taskID, taskObject);
 }
 
 // creates the instructions for exporting
@@ -1178,7 +1056,6 @@ function initialiseTaskData()
 // builds data for a specific task
 function buildTaskData(difficulty, done, name, spoons)
 {
-  console.log(spoons);
   const taskData = { };
   taskData.name = name;
   taskData.difficulty = difficulty;
@@ -1485,6 +1362,12 @@ function updateTable(s)
 
 // -- ERROR HANDLING
 
+// errors for devs - logged to the console
+function developerError(s)
+{
+  console.log(s);
+}
+
 // creates an error message with an OK button to remove it
 function error(s, obj)
 {
@@ -1757,29 +1640,136 @@ function buildSpoonList(types,values)
 
 // -- TASK VIEWS
 
-// this should change the view between task and archive view
-function changeView()
+// this should handle the button clicking and call changeView()
+function changeViewHandler(obj)
 {
-  // stuff
+  const viewType = $(obj).attr("id");
+  changeView(viewType);
+}
+
+// this should change the view between task and archive view
+function changeView(view)
+{
   // basically: determine which view is required and call taskView or archiveView()
+  if (view === "archive")
+  {
+    archiveView();
+  }
+  else if (view == "tasks")
+  {
+    taskView();
+  }
+  else
+  {
+    developerError("changeView() called with invalid view type");
+  }
 }
 
 // this should implement the task view
 function taskView()
 {
-  // stuff
+  // set up necessary data
+  const taskList = $("#tasklist");
+  const archiveList = $("#archivelist");
+  const tasks = $("body").data("tasks");
+  const active = tasks["active"];
+  const activeKeys = Object.keys(active);
   // first, update the tasklist with data from the DOM
+  const activeList = getIDList("tasklist");
+  console.log(activeList);
+  if (activeList.length > 0) // there are already entries in the table
+  {
+    for (let i = 0; i < activeKeys.length; i++)
+    {
+      if (!activeList.find(element => element === activeKeys[i]))
+      {
+        // write the task to the table
+        addTask(activeKeys[i], active[activeKeys[i]]);
+      }
+    }
+  }
+  else
+  {
+    for (let j = 0; j < activeKeys.length; j++)
+    {
+      // write the task to the table
+      addTask(activeKeys[j], active[activeKeys[j]]);
+    }
+  }
   // hide the archive
+  archiveList.hide();
   // show the tasklist
+  taskList.show();
+  // switch our links around
+  switchViewLinks("archive");
 }
 
 // this should implement the archive view
 function archiveView()
 {
-  // stuff
+  const tasklist = $("#tasklist");
+  const archivelist = $("#archivelist");
   // first, update the archive with data from the DOM
+  const archivedList = getIDList("archivelist");
+  const tasks = $("body").data("tasks");
+  const archive = tasks["archive"];
+  const archiveKeys = Object.keys(archive);
+  if (archivedList.length > 0) // there are already entries in the table
+  {
+    for (let i = 0; i < archiveKeys.length; i++)
+    {
+      if (!archivedList.find(element => element === archiveKeys[i]))
+      {
+        // write the task to the table
+        addArchiveTask(archiveKeys[i], archive[archiveKeys[i]]);
+      }
+    }
+  }
+  else
+  {
+    for (let j = 0; j < archiveKeys.length; j++)
+    {
+      // write the task to the table probably by calling addTask
+      addArchiveTask(archiveKeys[j], archive[archiveKeys[j]]);
+    }
+  }
   // hide the tasklist
+  tasklist.hide();
   // show the archive
+  archivelist.show();
+  // switch our links around
+  switchViewLinks("tasks");
+}
+
+function switchViewLinks(s)
+{
+  const container = ($(".views-container"));
+  if (s === "tasks")
+  {
+    const taskLink = makeViewLink("tasks");
+    taskLink.click(function()
+                  {
+      changeViewHandler(this);
+    });
+    const archiveSpan = makeViewText("archive");
+    container.empty();
+    container.append(taskLink, " ", archiveSpan);
+  }
+  else if (s === "archive")
+  {
+    const taskSpan = makeViewText("tasks");
+    const archiveLink = makeViewLink("archive");
+    archiveLink.click(function()
+                     {
+      changeViewHandler(this);
+    });
+    container.empty();
+    container.append(taskSpan, " ", archiveLink);
+  }
+  else
+  {
+    developerError("switchViewLinks() called with invalid view type");
+  }
 }
 
 // -- TASK READING AND WRITING
@@ -1799,23 +1789,109 @@ function getNameBox(row)
   return $(row.children().filter(".tasknamebox")[0])
 }
 
+// removes task from the DOM
 function removeTaskData(s,id)
 {
   const tasks = $("body").data().tasks;
-  console.log(tasks);
   if (s === "tasklist")
   {
-    console.log("task list");
     delete tasks.active[id];
+  }
+  else if (s === "archive")
+  {
+    delete tasks.archive[id];
+  }
+  else
+  {
+    developerError("removeTaskData() called with invalid task type");
+  }
+}
+
+// get list of IDs from the relevant table
+function getIDList(s)
+{
+  let IDList = [];
+  if (s === "tasklist")
+  {
+    const rows = $("#tasklist").children().filter(".task");
+    if (rows.length === 0)
+    {
+      return [];
+    }
+    else
+    {
+      for (let i = 0; i < rows.length; i++)
+      {
+        IDList.push(getSavedTaskID($(rows[i])));
+      }
+      return IDList;
+    }
+  }
+  else if (s === "archivelist")
+  {
+    const rows = $("#archivelist").children().filter(".task");
+    if (rows.length === 0)
+    {
+      return [];
+    }
+    else
+    {
+      for (let i = 0; i < rows.length; i++)
+      {
+        IDList.push(getSavedTaskID($(rows[i])));
+      }
+      return IDList;
+    }
+  }
+  else
+  {
+    developerError("getIDList() called with invalid task type");
+    return IDList;
   }
 }
 
 // -- HTML WRANGLING
 
-// returns the first task row if it exists, otherwise false
-function tasksExist()
+// makes a view link
+function makeViewLink(text)
 {
-  const tasks = $(".task");
+  const link = makeLink(text, "javascript:void(0)");
+  link.attr("id", text);
+  link.addClass("view");
+  return link;
+}
+
+/// makes a view text
+function makeViewText(text)
+{
+  const textSpan = makeSpan();
+  textSpan.attr("id", text);
+  textSpan.addClass("view");
+  setText(textSpan, text);
+  return textSpan;
+}
+
+// returns the first task row if it exists, otherwise false
+function tasksExist(s)
+{
+  let taskType;
+  if (s === "tasklist")
+  {
+    // work on the tasklist
+    taskType = "#tasklist.task";
+    
+  }
+  else if (s === "archive")
+  {
+    // work on the archive
+    taskType = "#archivelist.task";
+  }
+  else
+  {
+    developerError("tasksExist() called with invalid task type");
+    return false;
+  }
+  const tasks = $(taskType);
   if (tasks.length == 0)
   {
     return false;
@@ -1921,8 +1997,8 @@ function makeTaskHeaderRow(s,spoonTypes)
   return row;
 }
 
-// makes a new task row for the tasklist or archive table
-function makeNewTaskRow(spoonTypes,spoonDifficulties)
+// makes a new task row for the tasklist table
+function makeNewTaskRow(spoonTypes, spoonDifficulties)
 {
   const row = makeTableRow("newtask");
   const difficultyBox = makeNewTaskDifficulty();
@@ -1937,6 +2013,306 @@ function makeNewTaskRow(spoonTypes,spoonDifficulties)
   }
   row.append(addBox);
   return row;
+}
+
+// makes a task row for the tasklist
+function makeTasklistRow(id, task)
+{
+  // stuff
+  const spoonTypes = $("body").data("spoonTypes");
+  const displayMode = $("body").data("displayMode");
+  const spoonEmojis = $("body").data("spoonEmoji");
+  // make a new row
+  let newRow = makeTableRow("task");
+  // create and append the difficulty
+  const difficultyBox = makeDifficultyBox(displayMode, spoonEmojis, task.difficulty);
+  newRow.append(difficultyBox);
+  // create and append the done checkbox
+  const doneBox = makeDoneBox(task.done);
+  newRow.append(doneBox);
+  // create and append the task name
+  const nameBox = makeNameBox(id, task.name, task.done);
+  newRow.append(nameBox);
+  // create and append the spoon counts
+  const spoonBoxes = makeSpoonBoxes(displayMode, spoonEmojis, spoonTypes, task.spoons);
+  for (let i = 0; i < spoonBoxes.length; i++)
+  {
+    newRow.append(spoonBoxes[i]);
+  }
+  // create and append the edit box
+  const editBox = makeEditBox("active");
+  newRow.append(editBox);
+  // create and append the delete box
+  const deleteBox = makeDeleteBox();
+  newRow.append(deleteBox);
+  // create and append the archive box
+  const archiveBox = makeArchiveBox();
+  newRow.append(archiveBox);
+  return newRow;
+}
+
+// makes a task row for the archive
+function makeArchivelistRow(id, task)
+{
+  // get necessary data from the DOM
+  const spoonTypes = $("body").data("spoonTypes");
+  const displayMode = $("body").data("displayMode");
+  const spoonEmojis = $("body").data("spoonEmoji");
+  // make a new row
+  let newRow = makeTableRow("task");
+  // create and append the difficulty
+  const difficultyBox = makeDifficultyBox(displayMode, spoonEmojis, task.difficulty);
+  newRow.append(difficultyBox);
+  // create and append the task name
+  const nameBox = makeNameBox(id, task.name, task.done);
+  newRow.append(nameBox);
+  // create and append the spoon counts
+  const spoonBoxes = makeSpoonBoxes(displayMode, spoonEmojis, spoonTypes,task.spoons);
+  for (let i = 0; i < spoonBoxes.length; i++)
+  {
+    newRow.append(spoonBoxes[i]);
+  }
+  // create and append the edit button
+  const editBox = makeEditBox("archive");
+  newRow.append(editBox)
+  // create and append the delete box
+  const deleteBox = makeDeleteBox();
+  newRow.append(deleteBox);
+  // create and append the redo button
+  const redoBox = makeRedoBox();
+  newRow.append(redoBox);
+  return newRow;
+}
+
+// makes a difficulty box for a task row
+function makeDifficultyBox(displayMode, spoonEmojis, difficulty)
+{
+  const difficultyBox = makeTableCell("difficultybox");
+  const difficultyScreenReaderSpan = makeScreenReaderSpan("difficulty");
+  let spoonCostSpan;
+  if (displayMode == "text")
+  {
+    spoonCostSpan = makeSpan();
+    setText(spoonCostSpan, reverseSpoon(difficulty));
+    let difficultyBGColour = setSpoonColour(difficulty);
+    difficultyBox.css("background-color", difficultyBGColour);
+  }
+  else if (displayMode == "emoji")
+  {
+    spoonCostSpan = trafficLightSpan(difficulty,spoonEmojis);
+  }
+  difficultyBox.append(difficultyScreenReaderSpan, spoonCostSpan);
+  return difficultyBox;
+}
+
+// makes a done box for a task row
+function makeDoneBox(done)
+{
+  const doneBox = makeTableCell("donebox");
+	const doneScreenReaderSpan = makeScreenReaderSpan("done?");
+	doneBox.append(doneScreenReaderSpan);
+	const doneCheckBox = makeDoneCheckbox();
+  if (done) // could probably test this once rather than twice
+  {
+    doneCheckBox.prop("checked", true);
+  }
+	doneBox.append(doneCheckBox);
+  return doneBox;
+}
+
+function makeDoneCheckbox()
+{
+  const done = $
+  (
+    "<input></input>",
+    {
+		  type: "checkbox",
+		  on: {
+			click: function() {
+				 doneHandler(this);
+			}
+		 }
+	  }
+  );
+	done.addClass("done");
+  return done;
+}
+
+// makes a name box for a task row
+function makeNameBox(taskID, name, done)
+{
+  const nameBox = makeTableCell("tasknamebox");
+  const taskIdSpan = makeSpan();
+  taskIdSpan.addClass("taskid");
+  const taskIdInput = $
+  (
+    "<input></input>",
+    {
+      type: "hidden"
+    }
+  );
+  setVal(taskIdInput, taskID);
+  taskIdSpan.append(taskIdInput);
+  const taskNameScreenReaderSpan = makeScreenReaderSpan();
+  setText(taskNameScreenReaderSpan,"task name");
+  const taskNameSpan = makeSpan();
+  taskNameSpan.addClass("taskname");
+  setText(taskNameSpan,name);
+  if (done)
+  {
+    nameBox.addClass("completed");
+  }
+  nameBox.append(taskIdSpan);
+  nameBox.append(taskNameScreenReaderSpan);
+  nameBox.append(taskNameSpan);
+  return nameBox;
+}
+
+// makes the spoon boxes for a task row
+function makeSpoonBoxes(displayMode, spoonEmojis, spoonTypes, spoonValues)
+{
+  // stuff
+  let spoons = [];
+  for (let i = 0; i < spoonTypes.length; i++)
+  {
+    let spoon = makeSpoonBox(displayMode, spoonEmojis, spoonTypes[i], spoonValues[spoonTypes[i]]);
+    spoons.push(spoon);
+  }
+  return spoons;
+}
+
+// makes a spoon box for a task row
+function makeSpoonBox(displayMode, spoonEmojis, spoonType, spoonValue)
+{
+  let spoonBox = makeTableCell("spoon");
+  spoonBox.addClass(spoonType);
+  let spoonScreenReaderSpan = makeScreenReaderSpan(spoonType);
+  let spoonName = reverseSpoon(spoonValue);
+  let spoonSpan;
+  if (displayMode == "text")
+  {
+    spoonSpan = makeSpan();
+    setText(spoonSpan,spoonName);
+    let spoonBGColour = setSpoonColour(spoonValue);
+    spoonBox.css("background-color", spoonBGColour);
+  }
+  else if (displayMode == "emoji")
+  {
+    spoonSpan = trafficLightSpan(spoonValue,spoonEmojis);
+  }
+  spoonBox.append(spoonScreenReaderSpan);
+  spoonBox.append(spoonSpan);
+  return spoonBox;
+}
+
+// makes the edit button for a task row
+function makeEditBox(s)
+{
+  const editButtonBox = makeTableCell("changetask");
+  let editButton;
+  if (s === "active")
+  {
+    editButton = makeActiveEditButton();
+  }
+  else if (s === "archive")
+  {
+    editButton = makeArchiveEditButton();
+  }
+  else
+  {
+    developerError("makeEditBox() called with invalid task type");
+  }
+	editButton.addClass("edittask");
+	editButtonBox.html(editButton);
+  return editButtonBox;
+}
+
+function makeActiveEditButton()
+{
+  const editButton = makeButton("Edit");
+  editButton.click(
+    function()
+    {
+      editButtonHandler(this);
+    }
+  );
+  return editButton;
+}
+
+function makeArchiveEditButton()
+{
+  const editButton = makeButton("Edit");
+  editButton.click(
+    function()
+    {
+      alert("To be implemented");
+    }
+  );
+  return editButton;
+}
+
+function makeDeleteBox()
+{
+  const deleteButtonBox = makeTableCell("removetask");
+	const deleteButton = makeDeleteButton();
+  deleteButton.addClass("deletetask");
+  setHTML(deleteButtonBox,deleteButton);
+  return deleteButtonBox;
+}
+
+function makeDeleteButton()
+{
+  const deleteButton = makeButton("Delete");
+  deleteButton.click(
+    function()
+    {
+      deleteButtonHandler(this);
+    }
+  )
+  return deleteButton;
+}
+
+function makeArchiveBox()
+{
+  const archiveButtonBox = makeTableCell("archivetask");
+  const archiveButton = makeArchiveButton();
+  archiveButton.addClass("archivetask");
+  setHTML(archiveButtonBox,archiveButton);
+  return archiveButtonBox;
+}
+
+function makeArchiveButton()
+{
+  const archiveButton = makeButton("Archive");
+  archiveButton.click(
+    function()
+    {
+      archiveButtonHandler(this);
+    }
+  );
+  return archiveButton;
+}
+
+function makeRedoBox()
+{
+  //stuff
+  const redoButtonBox = makeTableCell("redotask");
+  const redoButton = makeRedoButton();
+  redoButton.addClass("redotask");
+  redoButtonBox.html(redoButton);
+  return redoButtonBox;
+}
+
+function makeRedoButton()
+{
+  const redoButton = makeButton("Redo");
+  redoButton.click(
+    function()
+    {
+      alert("To be implemented");
+    }
+  );
+  return redoButton;
 }
 
 // creates a table cell
