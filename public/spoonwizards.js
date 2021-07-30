@@ -486,6 +486,7 @@ function deleteButtonHandler(obj)
   {
 		dad.remove();
 	}
+  // TODO: remove the task data from the DOM
 }
 
 // respond to the Archive button
@@ -505,7 +506,22 @@ function archiveButtonHandler(obj)
   saveArchiveData(taskID, task);
   // get rid of the task row
   row.remove();
-  logTaskData();
+}
+
+// respond to the Redo button
+function redoButtonHandler(obj)
+{
+  // grab spoon data
+  const row = getGrandparent($(obj));
+  const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.archive[taskID];
+  // remove the task from the archive
+  removeTaskData("archivelist". taskID);
+  // save the task to active tasks
+  saveTaskData(taskID, task);
+  // get rid of the task row
+  row.remove();
 }
 
 // -- COMPLETING TASKS
@@ -1078,7 +1094,7 @@ function buildSpoonData(a)
 }
 
 // saves task data to the DOM by its ID
-function saveTaskData(id,obj)
+function saveTaskData(id, obj)
 {
   const data = $("body").data();
   const activeTasks = data.tasks.active;
@@ -1797,7 +1813,7 @@ function removeTaskData(s,id)
   {
     delete tasks.active[id];
   }
-  else if (s === "archive")
+  else if (s === "archivelist")
   {
     delete tasks.archive[id];
   }
@@ -2309,7 +2325,7 @@ function makeRedoButton()
   redoButton.click(
     function()
     {
-      alert("To be implemented");
+      redoButtonHandler(this);
     }
   );
   return redoButton;
