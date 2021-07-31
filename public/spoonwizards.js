@@ -64,6 +64,21 @@ $(document).ready(
   }
 );
 
+const testTask = { name: "test task",
+                   difficulty: 1,
+                   done: 0,
+                   spoons: { physical: 1,
+                           mental: 0,
+                           social: 0,
+                           travel: 0,
+                           "executive-function": 0,
+                           emotional: 0,
+                           time: 0,
+                           stress: 0,
+                           pain: 0,
+                           symptoms: 0}
+                     }
+
 // -- SETUP --
 
 // builds the settings paragraph
@@ -228,6 +243,7 @@ function saveNewTaskButtonHandler(obj)
 	// put our newly generated row into the table
   // add our new task to the table
   const taskID = assignTaskID();
+  saveTaskData(taskID, taskObject);
   addTask(taskID, taskObject);
 };
 
@@ -252,9 +268,6 @@ function clearNewTaskRow(obj)
 function addTask(taskID, task)
 {
   const table = $("#tasklist");
-  // assign the task a task ID
-  // add the task data to the DOM
-  saveTaskData(taskID,task);
   // create a new row
   const newRow = makeTasklistRow(taskID, task);
   // finally, stick the new row on the table
@@ -289,186 +302,48 @@ function addArchiveTask(id, task)
 // respond to a click on the "Edit" button
 function editButtonHandler(obj)
 {
-	const displayMode = $("body").data("displayMode");
-	const dad = getGrandparent($(obj));
-	const kids = dad.children();
-	// change the task name field back to an input box
-	const taskNameBox = $(kids[2]);
-	const taskNameSpan = $(taskNameBox.children()[2]);
-	const taskName = $(taskNameBox.children()[2]).html();
-	const taskNameInput = $("<input></input>", {
-		value: taskName
-	});
-	taskNameSpan.remove();
-	taskNameBox.append(taskNameInput);
-	// change the spoon fields back to dropdowns
-	const spoon = kids.filter(".spoon");
-	const blankOption = "<option value='blank'></option>"
-	const noneOption = "<option value='none'>none</option>"
-	const lowOption = "<option value='low'>low</option>";
-	const lowOptionSelected = "<option value='low' selected='selected'>low</option>";
-	const mediumOption = "<option value='medium'>medium</option>";
-	const mediumOptionSelected = "<option value='medium' selected='selected'>medium</option>";
-	const highOption = "<option value='high'>high</option>";
-	const highOptionSelected = "<option value='high' selected='selected'>high</option>";
-	const veryHighOption = "<option value='very high'>very high</option>";
-	const veryHighOptionSelected = "<option value='very high' selected='selected'>very high</option>";
-	for (let i = 0; i < spoon.length; i++)
-  {
-		let spoonSelector = $("<select></select>");
-		let classes = spoon[i].classList;
-		let spoonContent = $(spoon[i]);
-		let spoonTitle;
-		let spoonSpan = $(spoonContent.children()[1]);
-		if (displayMode == "emoji")
-    {
-			spoonTitle = $(spoonContent.children()[1]).attr("title");
-		}
-    else if (displayMode == "text")
-    {
-			spoonTitle = $(spoonContent.children()[1]).html();
-			$(spoon[i]).css("background-color","");
-		}
-		let j;
-		spoonSelector.addClass(classes[1]);
-		if (spoonTitle == "very high")
-    {
-			spoonSelector.append(blankOption, noneOption, lowOption, mediumOption, highOption, veryHighOptionSelected);
-		} else if (spoonTitle == "high")
-    {
-			spoonSelector.append(blankOption, noneOption, lowOption, mediumOption, highOptionSelected, veryHighOption);
-		} else if (spoonTitle == "medium")
-    {
-			spoonSelector.append(blankOption, noneOption, lowOption, mediumOptionSelected, highOption, veryHighOption);
-		} else if (spoonTitle == "low")
-    {
-			spoonSelector.append(blankOption, noneOption, lowOptionSelected, mediumOption, highOption, veryHighOption);
-		} else
-    {
-			spoonSelector.append(blankOption, noneOption, lowOption, mediumOption, highOption, veryHighOption);
-		}
-		spoonSpan.remove();
-		$(spoon[i]).append(spoonSelector);
-	}
-	// change the edit button back to a save button with its own handler function
-	const saveButton = $
-  (
-    "<input></input>",
-    {
-		  type: "button",
-		  value: "Save",
-		  on:
-      {
-			  click: function()
-        {
-				  saveEditedTaskButtonHandler(this);
-			  }
-		  }
-	  }
-  );
-	saveButton.addClass("saveedited");
-	const changeTask = $(kids.filter(".changetask")[0]);
-	changeTask.html(saveButton);
+  const row = getGrandparent($(obj)); 
+  const task = getRowData(row);
+  openTask(row, task);
+  editToSave($(obj), $(obj).parent());
+}
+
+function editToSave(button, buttonBox)
+{
+  button.remove();
+  const saveButton = makeSaveButton();
+  buttonBox.append(saveButton);
+}
+
+function saveToEdit(button, buttonBox)
+{
+  button.remove()
+  const editButton = makeEditButton();
+  buttonBox.append(editButton);
 }
 
 // respond to the Save button
 function saveEditedTaskButtonHandler(obj)
 {
-	// code goes here
-	// save the new name/spoon values in place
-	// reinstate the edit button
-	const displayMode = $("body").data("displayMode");
-	const homeTable = $("#tasklist");
-	const homeSpoonList = $("body").data("spoonTypes");
-  const homeSpoonEmoji = $("body").data("spoonEmoji");
-	const dad = getGrandparent($(obj));
-	const kids = dad.children();
-  const taskData = getNewTaskData(dad);
-  const taskID = getSavedTaskID(dad);
-  const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
-  updateTask(dad,displayMode,taskID,taskObject,homeSpoonList,homeSpoonEmoji);
+  // first: grab the task ID and data
+  const row = getGrandparent($(obj));
+  const taskType = getRowsTable(row);
+  const taskID = getSavedTaskID(row);
+  const taskData = getNewTaskData(row);
+  const taskObject = buildTaskData(taskData[0], taskData[1], taskData[2], taskData[3]);
+  // save data to the DOM
+  saveTaskData(taskID, taskObject);
+  // update the task table
+  updateTask(row, taskObject);
+  saveToEdit($(obj), $(obj).parent());
 }
 
 // updates an edited task
 // TBD: update the edited tasks in the DOM, reliant on bug #37
-function updateTask(row,displayMode,taskID,task,spoonTypes,spoonEmojis)
+function updateTask(row, task)
 {
-  // update the task data in the DOM
-  saveTaskData(taskID,task);
-  const kids = row.children();
-  // update the overall difficulty
-  const difficultyBox = $(kids.filter(".difficultybox")[0]);
-  const difficultySpan = $(difficultyBox.children()[1]);
-  let spoonCostSpan;
-  const spoonCost = task.difficulty;
-  const spoonName = reverseSpoon(spoonCost);
-  if (displayMode == "emoji")
-  {
-		spoonCostSpan = trafficLightSpan(spoonCost,spoonEmojis);
-	}
-  else if (displayMode == "text")
-  {
-		const bgColour = setSpoonColour(spoonCost);
-    spoonCostSpan = makeSpan();
-    setText(spoonCostSpan,spoonName)
-		difficultyBox.css("background-color",bgColour);
-	}
-  difficultySpan.remove();
-  difficultyBox.append(spoonCostSpan);
-  // update the task name
-  const taskNameBox = $(kids.filter(".tasknamebox")[0]);
-	const taskNameInput = $(taskNameBox.children()[2]);
-	const taskName = task.name;
-	const taskNameSpan = makeSpan();
-  setText(taskNameSpan,taskName)
-	taskNameInput.remove();
-	taskNameBox.append(taskNameSpan);
-  // update spoon counts
-  const spoon = kids.filter(".spoon");
-  const taskSpoons = task.spoons;
-  for (let i = 0; i < spoonTypes.length; i++)
-  {
-    let spoonBox = $(spoon.filter("." + spoonTypes[i])[0]);
-    let spoonForm = spoonBox.children();
-    let spoonSpan = $(spoonForm[1]);
-    let newSpoonSpan;
-    let spoonVal = taskSpoons[spoonTypes[i]];
-    let spoonValName = reverseSpoon(spoonVal);
-    // TBD here: convert the numbers to their appropriate values when in the code below
-    if (displayMode == "emoji")
-    {
-			newSpoonSpan = trafficLightSpan(spoonVal,spoonEmojis);
-		}
-    else if (displayMode == "text")
-    {
-			let spoonBGColour = setSpoonColour(spoonVal);
-			newSpoonSpan = makeSpan();
-      setText(newSpoonSpan,spoonValName);
-			spoonBox.css("background-color",spoonBGColour);
-		}
-    spoonSpan.remove();
-    spoonBox.append(newSpoonSpan);
-  }
-  // reinstate the edit button
-  const editButtonBox = $(kids.filter(".changetask")[0]);
-	const editButton = $
-  (
-    "<input></input>",
-    {
-		  type: "button",
-		  value: "Edit",
-		  on: 
-      {
-			  click: function()
-        {
-				  editButtonHandler(this);
-			  }
-		  }
-		}
-  );
-	editButton.addClass("edittask");
-	editButtonBox.html(editButton);
-  logTaskData();
+  // this is just a container function now isn't it hmm
+  closeTask(row, task);
 }
 
 // -- REMOVING TASKS
@@ -476,16 +351,19 @@ function updateTask(row,displayMode,taskID,task,spoonTypes,spoonEmojis)
 // respond to the Delete button
 function deleteButtonHandler(obj)
 {
-	const dad = getGrandparent($(obj));
-	const kids = dad.children();
-	const taskNameBox = $(kids.filter(".tasknamebox")[0]);
+	const row = getGrandparent($(obj));
+  const taskType = getRowsTable(row);
+	const taskNameBox = getNameBox(row);
 	const taskName = $(taskNameBox.children()[2]).html();
+  const taskID = getSavedTaskID(row);
 	const confirmString = "Really delete " + taskName + "?";
 	const r = confirm(confirmString);
 	if (r == true)
   {
-		dad.remove();
+		row.remove();
+    removeTaskData(taskType, taskID);
 	}
+  // TODO: remove the task data from the DOM
 }
 
 // respond to the Archive button
@@ -505,7 +383,22 @@ function archiveButtonHandler(obj)
   saveArchiveData(taskID, task);
   // get rid of the task row
   row.remove();
-  logTaskData();
+}
+
+// respond to the Redo button
+function redoButtonHandler(obj)
+{
+  // grab spoon data
+  const row = getGrandparent($(obj));
+  const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.archive[taskID];
+  // remove the task from the archive
+  removeTaskData("archivelist", taskID);
+  // save the task to active tasks
+  saveTaskData(taskID, task);
+  // get rid of the task row
+  row.remove();
 }
 
 // -- COMPLETING TASKS
@@ -988,7 +881,7 @@ function importSubmitHandler(obj)
 // tasks should be pre-validated
 function addImportedTaskList(a)
 {
-  for (let i = a.length - 1; i >= 0; i--) // iterate backwards over the list so we don't keep reversing it
+  for (let i = 0; i < a.length; i++) 
   {
     addImportedTask(a[i]);
   }
@@ -998,14 +891,26 @@ function addImportedTaskList(a)
 // task should be pre-validated
 function addImportedTask(a)
 {
-  const homeTable = $("#tasklist");
+  let homeTable;
+  if (a[0] === "t")
+  {
+    homeTable = $("#tasklist");
+  }
+  else if (a[0] === "a")
+  {
+    homeTable = $("#archivelist");
+  }
+  else
+  {
+    developerError("addImportedTask() called with invalid task type");
+  }
   const homeSpoonTypes = $("body").data("spoonTypes");
 	const homeSpoonEmoji = $("body").data("spoonEmoji");
 	const displayMode = $("body").data("displayMode");
-  const overallSpoon = parseInt(a[0]);
-  const done = parseInt(a[1]);
-  const name = a[2];
-  const spoonsRaw = a.slice(3,a.length);
+  const overallSpoon = parseInt(a[1]);
+  const done = parseInt(a[2]);
+  const name = a[3];
+  const spoonsRaw = a.slice(4,a.length);
   let spoonsProcessed = [];
   for (let i = 0; i < spoonsRaw.length; i++)
   {
@@ -1013,7 +918,16 @@ function addImportedTask(a)
   }
   const taskObject = buildTaskData(overallSpoon, done, name, spoonsProcessed);
   const taskID = assignTaskID();
-  addTask(taskID, taskObject);
+  if (a[0] === "t")
+  {
+    saveTaskData(taskID, taskObject);
+    addTask(taskID, taskObject);
+  }
+  else if (a[0] == "a")
+  {
+    saveArchiveData(taskID, taskObject);
+    addArchiveTask(taskID, taskObject);
+  }
 }
 
 // creates the instructions for exporting
@@ -1078,14 +992,14 @@ function buildSpoonData(a)
 }
 
 // saves task data to the DOM by its ID
-function saveTaskData(id,obj)
+function saveTaskData(id, obj)
 {
   const data = $("body").data();
   const activeTasks = data.tasks.active;
   activeTasks[id] = obj;
 }
 
-function saveArchiveData(id,obj)
+function saveArchiveData(id, obj)
 {
   const data = $("body").data();
   const archive = data.tasks.archive;
@@ -1103,6 +1017,7 @@ function assignTaskID() {
 // grabs task data from an open row (either a new task or while being edited)
 function getNewTaskData(row)
 {
+  const rowType = row.attr("class");
   const kids = row.children();
   // set an overall difficulty for the task
 	const spoon = kids.filter(".spoon");
@@ -1146,45 +1061,90 @@ function getNewTaskData(row)
 	const taskName = taskNameInput.val();
 	// spoon counts
   let spoonCosts = [];
-	for (let j = 0; j < spoon.length; j++)
+  if (rowType == "newtask")
   {
-		let newSpoonBox = makeTableCell();
-		let spoonForm = $(spoon[j]).children();
-    let spoonType = $(spoonForm[1]).attr("class");
-		let spoonVal;
-		if ($(spoonForm[1]).val() == "blank")
+	  for (let j = 0; j < spoon.length; j++)
     {
-			spoonVal = "none";
-		}
-    else
+		  let spoonForm = $(spoon[j]).children();
+      let spoonType = $(spoonForm[1]).attr("class");
+		  let spoonVal;
+		  if ($(spoonForm[1]).val() == "blank")
+      {
+			  spoonVal = "none";
+		  }
+      else
+      {
+			  spoonVal = $(spoonForm[1]).val();
+		  }
+      spoonCosts.push([spoonType, spoonVal]);
+	  }
+  }
+  else if (rowType == "task")
+  {
+    for (let k = 0; k < spoon.length; k++)
     {
-			spoonVal = $(spoonForm[1]).val();
-		}
-    spoonCosts.push([spoonType, spoonVal]);
-		let spoonDad = spoonForm.parent();
-	}
+      let spoonBox = $(spoon[k]);
+      let spoonType = spoonBox.attr("class").split(" ")[1];
+      let spoonVal;
+      let spoonForm = $(spoonBox.children()[1]);
+      if (spoonForm.val() == "blank")
+      {
+        spoonVal = "none";
+      }
+      else
+      {
+        spoonVal = spoonForm.val();
+      }
+      spoonCosts.push([spoonType, spoonVal]);
+    }
+  }
+  else
+  {
+    developerError("getNewTaskData() called on invalid row type");
+    return;
+  }
   return [spoonCost,done,taskName,spoonCosts];
 }
 
 // gets task data from the tasklist
 function getExportData()
 {
-	const tableRows = $("#tasklist").children();
-	const taskRows = tableRows.filter(".task");
+  // okay instead of getting the list of table rows which are only updated on switch
+  // I want to get the list of tasks from the DOM
+  const tasks = $("body").data("tasks");
+  const taskListKeys = Object.keys(tasks["active"]);
+  const archiveListKeys = Object.keys(tasks["archive"]);
+	const taskListRows = $("#tasklist").children().filter(".task");
+  const archiveListRows = $("#archivelist").children().filter(".task");
   let taskData = "";
   let rowData;
-  for (let i = 0; i < taskRows.length; i++)
+  if (taskListKeys)
   {
-    rowData = getRowData($(taskRows[i]));
-    if (i == 0)
+    for (let i = 0; i < taskListKeys.length; i++)
     {
-      taskData = taskData.concat(rowData);
-    } else
-    {
-      rowData = "\n".concat(rowData);
-      taskData = taskData.concat(rowData);
+      rowData = stringifyTaskData("tasklist", getSavedTask("tasklist", taskListKeys[i]));
+      if (taskData.length === 0)
+      {
+        taskData = taskData.concat(rowData);
+      } else
+      {
+        taskData = taskData.concat("\n", rowData);
+      }
     }
-  };
+  }
+  if (archiveListKeys)
+    for (let j = 0; j < archiveListKeys.length; j++)
+    {
+      rowData = stringifyTaskData("archivelist", getSavedTask("archivelist", archiveListKeys[j]));
+      if (taskData.length === 0)
+      {
+        taskData = taskData.concat(rowData);
+      }
+      else
+      {
+        taskData = taskData.concat("\n", rowData);
+      }
+    }
   return taskData;
 }
 
@@ -1195,64 +1155,38 @@ function getImportData()
 }
 
 // our input here is a closed task row
-function getRowData(obj)
+
+// our input here is a closed task row
+function getRowData(row)
 {
-  const displayMode = $("body").data("displayMode");
+  const taskID = getSavedTaskID(row);
+  const taskType = getRowsTable(row);
+  const task = getSavedTask(taskType, taskID);
+  return task;
+}
+
+function stringifyTaskData(s, task)
+{
   let rowData = "";
-  // grab the individual task boxes
-  const rowKids = obj.children();
-  // grab the overall difficulty of the task
-  const difficultyBox = $(rowKids[0]);
-  const difficultyKids = difficultyBox.children();
-  let difficulty;
-  if (displayMode == "text")
+  const spoonTypes = $("body").data("spoonTypes");
+  if (s === "tasklist")
   {
-    difficulty = $(difficultyKids[1]).text();
+    // stuff
+    rowData = "t";
+  }
+  else if (s === "archivelist")
+  {
+    // more stuff
+    rowData = "a";
   }
   else
   {
-    difficulty = $(difficultyKids[1]).attr("title");
-  };
-  const difficultyVal = parseSpoon(difficulty);
-  // is the task done?
-  const doneBox = $(rowKids[1]);
-  const doneCheckBox = $(doneBox.children()[1]);
-  let doneBoxVal;
-  if (doneCheckBox.prop("checked"))
-  {
-    doneBoxVal = 1;
+    developerError("stringifyTaskData() called with invalid task type");
   }
-  else
+  rowData = rowData.concat(",", task.difficulty, ",", task.done, ",", task.name);
+  for (let i = 0; i < spoonTypes.length; i++)
   {
-    doneBoxVal = 0;
-  }
-  // what's the task's name?
-  const taskNameBox = $(rowKids[2]);
-  const taskNameKids = taskNameBox.children();
-  const taskName = $(taskNameKids[2]).text();
-  // what are the individual spoon values?
-  const spoon = rowKids.filter(".spoon");
-  let spoonList = [];
-  for (let i = 0; i < spoon.length; i++)
-  {
-    // get the spoon value
-    let spoonKids = $(spoon[i]).children();
-    let spoonVal;
-    if (displayMode == "text")
-    {
-      spoonVal = parseSpoon($(spoonKids[1]).text());
-    }
-    else
-    {
-      spoonVal = parseSpoon($(spoonKids[1]).attr("title"));
-    }
-    spoonList.push(spoonVal);
-  }
-  rowData = difficultyVal + "," + doneBoxVal + "," + taskName;
-  for (let j = 0; j < spoonList.length; j++)
-  {
-    rowData = rowData.concat(",");
-    rowData = rowData.concat(spoonList[j]);
+    rowData = rowData.concat(",", task.spoons[spoonTypes[i]]);
   }
   return rowData;
 }
@@ -1294,16 +1228,19 @@ function validateTaskList(a)
 function validateTask(a)
 {
   let v = true;
-  const overallSpoon = (validateSpoon(a[0]));
-  if (overallSpoon === false)
-  {
-      v = false;
-  }
-  if (validateDone === false)
+  if (validateTaskType(a[0]) === false)
   {
     v = false;
   }
-  for (let i = 3; i < a.length; i++)
+  if (validateSpoon(a[1]) === false)
+  {
+      v = false;
+  }
+  if (validateDone(a[2]) === false)
+  {
+    v = false;
+  }
+  for (let i = 4; i < a.length; i++)
   {
     let thisSpoon = validateSpoon(a[i]);
     if (thisSpoon === false)
@@ -1316,6 +1253,16 @@ function validateTask(a)
   } else {
     return [a, false];
   }
+}
+
+// validates a task type
+function validateTaskType(s)
+{
+  if (s === "t" || s === "a")
+  {
+    return true;
+  }
+  return false;
 }
 
 // validates a spoon value, which should be a digit between 0 and 4
@@ -1676,7 +1623,6 @@ function taskView()
   const activeKeys = Object.keys(active);
   // first, update the tasklist with data from the DOM
   const activeList = getIDList("tasklist");
-  console.log(activeList);
   if (activeList.length > 0) // there are already entries in the table
   {
     for (let i = 0; i < activeKeys.length; i++)
@@ -1783,6 +1729,12 @@ function getSavedTaskID(row)
   return taskID;
 }
 
+// returns the difficulty box of a saved task
+function getDifficultyBox(row)
+{
+  return $(row.children().filter(".difficultybox")[0]);
+}
+
 // returns the name box of a saved task
 function getNameBox(row)
 {
@@ -1797,7 +1749,7 @@ function removeTaskData(s,id)
   {
     delete tasks.active[id];
   }
-  else if (s === "archive")
+  else if (s === "archivelist")
   {
     delete tasks.archive[id];
   }
@@ -1807,6 +1759,25 @@ function removeTaskData(s,id)
   }
 }
 
+function getSavedTask(s, taskID)
+{
+  const tasks = $("body").data("tasks");
+  let task = {};
+  if (s === "tasklist")
+  {
+    task = tasks.active[taskID];
+  }
+  else if (s === "archivelist")
+  {
+    task = tasks.archive[taskID];
+  }
+  else
+  {
+    developerError("getSavedTask() called with invalid task type");
+  }
+  return task;
+}
+  
 // get list of IDs from the relevant table
 function getIDList(s)
 {
@@ -1850,6 +1821,95 @@ function getIDList(s)
   }
 }
 
+// find out what table we're in
+function getRowsTable(row)
+{
+  return row.parent().attr("id");
+}
+
+// open up a task for editing by the user
+function openTask(row, task)
+{
+  openNameBox(row, task.name);
+  openSpoonBoxes(row, task.spoons);
+}
+
+function openNameBox(row, name)
+{
+  const nameBox = getNameBox(row);
+  const nameSpan = $(nameBox.children().filter(".taskname"));
+  nameSpan.remove();
+  const nameInput = makeInput();
+  setVal(nameInput, name);
+  nameBox.append(nameInput);
+  // replace with an input box
+  // put the task name in as the value of the input box
+}
+
+function openSpoonBoxes(row, spoons)
+{
+  let spoonVals = Object.keys(spoons);
+  for (let i = 0; i < spoonVals.length; i++)
+  {
+    openSpoonBox(row, spoonVals[i], spoons[spoonVals[i]]);
+  }
+}
+
+function openSpoonBox(row, spoonType, spoon)
+{
+  const spoonClass = ".".concat(spoonType);
+  const spoonBox = $(row.children().filter(spoonClass));
+  const spoonSpan = $(spoonBox.children()[1]);
+  spoonSpan.remove();
+  const selector = makeSpoonSelector(reverseSpoon(spoon));
+  spoonBox.append(selector);
+  spoonBox.css("background-color", "");
+}
+
+// close a task so the user can no longer edit it
+function closeTask(row, task)
+{
+  // stuff
+  closeNameBox(row, task.name, task.done);
+  closeSpoonBoxes(row, task.spoons);
+}
+
+function closeNameBox(row, name, done)
+{
+  const nameBox = getNameBox(row);
+  const nameInput = nameBox.children().filter("input");
+  nameInput.remove();
+  const nameSpan = makeNameSpan(name);
+  if (done)
+  {
+    nameBox.addClass("done");
+  }
+  nameBox.append(nameSpan);
+}
+
+function closeSpoonBoxes(row, spoons)
+{
+  let spoonVals = Object.keys(spoons);
+  for (let i = 0; i < spoonVals.length; i++)
+  {
+    closeSpoonBox(row, spoonVals[i], spoons[spoonVals[i]]);
+  }
+}
+
+function closeSpoonBox(row, spoonType, spoon)
+{
+  const displayMode = $("body").data("displayMode");
+  const spoonEmojis = $("body").data("spoonEmoji");
+  const spoonClass = ".".concat(spoonType);
+  const spoonBox = $(row.children().filter(spoonClass));
+  const spoonInput = spoonBox.children().filter("select");
+  spoonInput.remove();
+  const spoonSpan = makeSpoonSpan(displayMode, spoonEmojis, spoon);
+  const bgColour = setSpoonColour(spoon);
+  spoonBox.css("background-color", bgColour);
+  spoonBox.append(spoonSpan);
+}
+
 // -- HTML WRANGLING
 
 // makes a view link
@@ -1878,20 +1938,19 @@ function tasksExist(s)
   if (s === "tasklist")
   {
     // work on the tasklist
-    taskType = "#tasklist.task";
-    
+    taskType = "#tasklist";
   }
   else if (s === "archive")
   {
     // work on the archive
-    taskType = "#archivelist.task";
+    taskType = "#archivelist";
   }
   else
   {
     developerError("tasksExist() called with invalid task type");
     return false;
   }
-  const tasks = $(taskType);
+  const tasks = $(taskType).children().filter(".task");
   if (tasks.length == 0)
   {
     return false;
@@ -2040,7 +2099,7 @@ function makeTasklistRow(id, task)
     newRow.append(spoonBoxes[i]);
   }
   // create and append the edit box
-  const editBox = makeEditBox("active");
+  const editBox = makeEditBox();
   newRow.append(editBox);
   // create and append the delete box
   const deleteBox = makeDeleteBox();
@@ -2073,7 +2132,7 @@ function makeArchivelistRow(id, task)
     newRow.append(spoonBoxes[i]);
   }
   // create and append the edit button
-  const editBox = makeEditBox("archive");
+  const editBox = makeEditBox();
   newRow.append(editBox)
   // create and append the delete box
   const deleteBox = makeDeleteBox();
@@ -2155,9 +2214,7 @@ function makeNameBox(taskID, name, done)
   taskIdSpan.append(taskIdInput);
   const taskNameScreenReaderSpan = makeScreenReaderSpan();
   setText(taskNameScreenReaderSpan,"task name");
-  const taskNameSpan = makeSpan();
-  taskNameSpan.addClass("taskname");
-  setText(taskNameSpan,name);
+  const taskNameSpan = makeNameSpan(name);
   if (done)
   {
     nameBox.addClass("completed");
@@ -2166,6 +2223,14 @@ function makeNameBox(taskID, name, done)
   nameBox.append(taskNameScreenReaderSpan);
   nameBox.append(taskNameSpan);
   return nameBox;
+}
+
+function makeNameSpan(name)
+{
+  const nameSpan = makeSpan();
+  nameSpan.addClass("taskname");
+  setText(nameSpan, name);
+  return nameSpan;
 }
 
 // makes the spoon boxes for a task row
@@ -2188,46 +2253,47 @@ function makeSpoonBox(displayMode, spoonEmojis, spoonType, spoonValue)
   spoonBox.addClass(spoonType);
   let spoonScreenReaderSpan = makeScreenReaderSpan(spoonType);
   let spoonName = reverseSpoon(spoonValue);
-  let spoonSpan;
+  const spoonSpan = makeSpoonSpan(displayMode, spoonEmojis, spoonValue);
   if (displayMode == "text")
   {
-    spoonSpan = makeSpan();
-    setText(spoonSpan,spoonName);
     let spoonBGColour = setSpoonColour(spoonValue);
     spoonBox.css("background-color", spoonBGColour);
-  }
-  else if (displayMode == "emoji")
-  {
-    spoonSpan = trafficLightSpan(spoonValue,spoonEmojis);
   }
   spoonBox.append(spoonScreenReaderSpan);
   spoonBox.append(spoonSpan);
   return spoonBox;
 }
 
-// makes the edit button for a task row
-function makeEditBox(s)
+function makeSpoonSpan(displayMode, spoonEmojis, spoon)
 {
-  const editButtonBox = makeTableCell("changetask");
-  let editButton;
-  if (s === "active")
+  let spoonSpan;
+  if (displayMode === "text")
   {
-    editButton = makeActiveEditButton();
+    spoonSpan = makeSpan();
+    setText(spoonSpan, reverseSpoon(spoon));
   }
-  else if (s === "archive")
+  else if (displayMode == "emoji")
   {
-    editButton = makeArchiveEditButton();
+    spoonSpan = trafficLightSpan(spoon, spoonEmojis);
   }
   else
   {
-    developerError("makeEditBox() called with invalid task type");
+    developerError("makeSpoonSpan() called with invalid display mode")
   }
+  return spoonSpan;
+}
+
+// makes the edit button for a task row
+function makeEditBox()
+{
+  const editButtonBox = makeTableCell("changetask");
+  const editButton = makeEditButton();
 	editButton.addClass("edittask");
 	editButtonBox.html(editButton);
   return editButtonBox;
 }
 
-function makeActiveEditButton()
+function makeEditButton()
 {
   const editButton = makeButton("Edit");
   editButton.click(
@@ -2239,16 +2305,16 @@ function makeActiveEditButton()
   return editButton;
 }
 
-function makeArchiveEditButton()
+function makeSaveButton()
 {
-  const editButton = makeButton("Edit");
-  editButton.click(
+  const saveButton = makeButton("Save");
+  saveButton.click(
     function()
     {
-      alert("To be implemented");
+      saveEditedTaskButtonHandler(this);
     }
   );
-  return editButton;
+  return saveButton;
 }
 
 function makeDeleteBox()
@@ -2309,7 +2375,7 @@ function makeRedoButton()
   redoButton.click(
     function()
     {
-      alert("To be implemented");
+      redoButtonHandler(this);
     }
   );
   return redoButton;
@@ -2400,6 +2466,28 @@ function setSpoonWidths(table)
   const spoons = cells.filter(".spoonhead");
   const width = spoons.outerWidth();
   spoons.outerWidth(width);
+}
+
+// makes an input box
+function makeInput()
+{
+  const input = $("<input></input>");
+  return input;
+}
+
+function makeSpoonSelector(s)
+{
+  const spoonValues = $("body").data("spoonDifficulties");
+  const selector = selectorWithBlank(spoonValues);
+  const options = selector.children();
+  for (let i = 0; i < options.length; i++)
+  {
+    if (options[i].value === s)
+    {
+      options[i].selected = "selected";
+    }
+  }
+  return selector;
 }
 
 // creates a selector from a list
