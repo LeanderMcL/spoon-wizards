@@ -236,7 +236,6 @@ function saveNewTaskButtonHandler(obj)
 	// grab the table row containing the button that just got clicked
 	const dad = getGrandparent($(obj));
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
-  console.log(taskData);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
 	// list of the tds inside the tr
   // clear the new task row
@@ -268,7 +267,6 @@ function clearNewTaskRow(obj)
 // add a new task to the tasklist table
 function addTask(taskID, task)
 {
-  console.log(task);
   const table = $("#tasklist");
   // create a new row
   const newRow = makeTasklistRow(taskID, task);
@@ -394,15 +392,12 @@ function redoButtonHandler(obj)
 {
   // grab spoon data
   const row = getGrandparent($(obj));
-  const taskID = getSavedTaskID(row);
+  const oldTaskID = getSavedTaskID(row);
+  const newTaskID = assignTaskID();
   const tasks = $("body").data("tasks");
-  const task = tasks.archive[taskID];
-  // remove the task from the archive
-  removeTaskData("archivelist", taskID);
+  const task = tasks.archive[oldTaskID];
   // save the task to active tasks
-  saveTaskData(taskID, task);
-  // get rid of the task row
-  row.remove();
+  saveTaskData(newTaskID, task);
 }
 
 // -- COMPLETING TASKS
@@ -1060,7 +1055,6 @@ function getNewTaskData(row)
   }
   // add the task name
 	const taskNameBox = getNameBox(row);
-  console.log(taskNameBox);
 	const grandkids = taskNameBox.children();
   let taskNameInput;
   if (grandkids.length == 2)
