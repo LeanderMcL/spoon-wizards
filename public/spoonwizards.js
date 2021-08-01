@@ -343,7 +343,19 @@ function saveEditedTaskButtonHandler(obj)
 function updateTask(row, task)
 {
   // recalculate the task difficulty
-  // update the task box
+  let spoonValList = []
+  let spoonKeys = Object.keys(task.spoons);
+  for (let i = 0; i < spoonKeys.length; i++)
+  {
+    spoonValList.push(task.spoons[spoonKeys[i]]);
+  }
+  const difficulty = setTaskDifficulty(spoonValList);
+  task.difficulty = difficulty;
+  // update the task difficulty box
+  const difficultyBox = getDifficultyBox(row);
+  const difficultySpan = $(difficultyBox.children()[1]);
+  setText(difficultySpan, reverseSpoon(task.difficulty));
+  difficultyBox.css("background-color", setSpoonColour(task.difficulty));
   // close the task
   closeTask(row, task);
 }
@@ -1528,6 +1540,13 @@ function parseSpoonCost(val, l)
   else {
 		return "none";
 	}
+}
+
+function setTaskDifficulty(spoons)
+{
+  const spoonVal = sumList(spoons);
+  const difficulty = parseSpoon(parseSpoonCost(spoonVal, spoons));
+  return difficulty;
 }
 
 // add all the values of a list
