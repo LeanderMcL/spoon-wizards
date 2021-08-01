@@ -342,7 +342,9 @@ function saveEditedTaskButtonHandler(obj)
 // TBD: update the edited tasks in the DOM, reliant on bug #37
 function updateTask(row, task)
 {
-  // this is just a container function now isn't it hmm
+  // recalculate the task difficulty
+  // update the task box
+  // close the task
   closeTask(row, task);
 }
 
@@ -1047,7 +1049,7 @@ function getNewTaskData(row)
     done = 0;
   }
   // add the task name
-	const taskNameBox = $(kids[2]);
+	const taskNameBox = getNameBox(row);
 	const grandkids = taskNameBox.children();
   let taskNameInput;
   if (grandkids.length == 2)
