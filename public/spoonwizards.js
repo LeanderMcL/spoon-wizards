@@ -236,6 +236,7 @@ function saveNewTaskButtonHandler(obj)
 	// grab the table row containing the button that just got clicked
 	const dad = getGrandparent($(obj));
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
+  console.log(taskData);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
 	// list of the tds inside the tr
   // clear the new task row
@@ -267,6 +268,7 @@ function clearNewTaskRow(obj)
 // add a new task to the tasklist table
 function addTask(taskID, task)
 {
+  console.log(task);
   const table = $("#tasklist");
   // create a new row
   const newRow = makeTasklistRow(taskID, task);
@@ -342,7 +344,9 @@ function saveEditedTaskButtonHandler(obj)
 // TBD: update the edited tasks in the DOM, reliant on bug #37
 function updateTask(row, task)
 {
-  // this is just a container function now isn't it hmm
+  // recalculate the task difficulty
+  // update the task box
+  // close the task
   closeTask(row, task);
 }
 
@@ -427,11 +431,15 @@ function completeTask(row)
 {
   // grab the specific parts of the row I need
   // could this be shortened and still be decently readable?
-  const kids = row.children();
-  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const taskNameBox = getNameBox(row);
   // add "completed" class
   // this adds a strikethrough
   taskNameBox.addClass("completed");
+  // update the task's done value in the DOM
+  const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.active[taskID];
+  task.done = 1;
 }
 
 // marks a task as not completed
@@ -439,11 +447,15 @@ function uncompleteTask(row)
 {
   // grab the specific parts of the row I need
   // again - look into multiple assignment to see if I can shorten this code
-  const kids = row.children();
-  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const taskNameBox = getNameBox(row);
   // remove "completed" class
   // removes the strikethrough
   taskNameBox.removeClass("completed");
+  // update the task's done value in the DOM
+  const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.active[taskID];
+  task.done = 0;
 }
 
 // -- USER SETTINGS
@@ -1047,7 +1059,8 @@ function getNewTaskData(row)
     done = 0;
   }
   // add the task name
-	const taskNameBox = $(kids[2]);
+	const taskNameBox = getNameBox(row);
+  console.log(taskNameBox);
 	const grandkids = taskNameBox.children();
   let taskNameInput;
   if (grandkids.length == 2)
@@ -2407,7 +2420,7 @@ function makeNewTaskDone()
 
 function makeNewTaskName()
 {
-  const cell = makeTableCell("name");
+  const cell = makeTableCell("tasknamebox");
   const screenReaderName = makeScreenReaderSpan("task name");
   const textInput = makeTextInput();
   cell.append(screenReaderName,textInput);
