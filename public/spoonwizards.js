@@ -429,11 +429,15 @@ function completeTask(row)
 {
   // grab the specific parts of the row I need
   // could this be shortened and still be decently readable?
-  const kids = row.children();
-  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const taskNameBox = getNameBox(row);
   // add "completed" class
   // this adds a strikethrough
   taskNameBox.addClass("completed");
+  // update the task's done value in the DOM
+  const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.active[taskID];
+  task.done = 1;
 }
 
 // marks a task as not completed
@@ -441,11 +445,15 @@ function uncompleteTask(row)
 {
   // grab the specific parts of the row I need
   // again - look into multiple assignment to see if I can shorten this code
-  const kids = row.children();
-  const taskNameBox = $(kids.filter(".tasknamebox"));
+  const taskNameBox = getNameBox(row);
   // remove "completed" class
   // removes the strikethrough
   taskNameBox.removeClass("completed");
+  // update the task's done value in the DOM
+  const taskID = getSavedTaskID(row);
+  const tasks = $("body").data("tasks");
+  const task = tasks.active[taskID];
+  task.done = 0;
 }
 
 // -- USER SETTINGS
