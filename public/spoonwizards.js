@@ -236,6 +236,7 @@ function saveNewTaskButtonHandler(obj)
 	// grab the table row containing the button that just got clicked
 	const dad = getGrandparent($(obj));
   const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
+  console.log(taskData);
   const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
 	// list of the tds inside the tr
   // clear the new task row
@@ -267,6 +268,7 @@ function clearNewTaskRow(obj)
 // add a new task to the tasklist table
 function addTask(taskID, task)
 {
+  console.log(task);
   const table = $("#tasklist");
   // create a new row
   const newRow = makeTasklistRow(taskID, task);
@@ -1058,6 +1060,7 @@ function getNewTaskData(row)
   }
   // add the task name
 	const taskNameBox = getNameBox(row);
+  console.log(taskNameBox);
 	const grandkids = taskNameBox.children();
   let taskNameInput;
   if (grandkids.length == 2)
@@ -2417,7 +2420,7 @@ function makeNewTaskDone()
 
 function makeNewTaskName()
 {
-  const cell = makeTableCell("name");
+  const cell = makeTableCell("tasknamebox");
   const screenReaderName = makeScreenReaderSpan("task name");
   const textInput = makeTextInput();
   cell.append(screenReaderName,textInput);
