@@ -235,8 +235,8 @@ function saveNewTaskButtonHandler(obj)
 	const displayMode = $("body").data("displayMode");
 	// grab the table row containing the button that just got clicked
 	const dad = getGrandparent($(obj));
-  const taskData = getNewTaskData(dad); // returns a list of difficulty, done, name, and spoons list
-  const taskObject = buildTaskData(taskData[0],taskData[1],taskData[2],taskData[3]);
+  const taskData = getNewTaskData(dad); // returns a list of points, difficulty, done, name, and spoons list
+  const taskObject = buildTaskData(taskData[0], taskData[1], taskData[2], taskData[3], taskData[4]);
 	// list of the tds inside the tr
   // clear the new task row
   clearNewTaskRow(dad);
@@ -330,7 +330,7 @@ function saveEditedTaskButtonHandler(obj)
   const taskType = getRowsTable(row);
   const taskID = getSavedTaskID(row);
   const taskData = getNewTaskData(row);
-  const taskObject = buildTaskData(taskData[0], taskData[1], taskData[2], taskData[3]);
+  const taskObject = buildTaskData(taskData[0], taskData[1], taskData[2], taskData[3], taskData[4]);
   // save data to the DOM
   saveTaskData(taskID, taskObject);
   // update the task table
@@ -351,6 +351,10 @@ function updateTask(row, task)
   }
   const difficulty = setTaskDifficulty(spoonValList);
   task.difficulty = difficulty;
+  // recalculate and update points
+  const points = assignPoints(spoonValList);
+  console.log(points);
+  task.points = points;
   // update the task difficulty box
   const difficultyBox = getDifficultyBox(row);
   const difficultySpan = $(difficultyBox.children()[1]);
@@ -926,16 +930,17 @@ function addImportedTask(a)
   const homeSpoonTypes = $("body").data("spoonTypes");
 	const homeSpoonEmoji = $("body").data("spoonEmoji");
 	const displayMode = $("body").data("displayMode");
-  const overallSpoon = parseInt(a[1]);
-  const done = parseInt(a[2]);
-  const name = a[3];
-  const spoonsRaw = a.slice(4,a.length);
+  const points = parseInt(a[1]);
+  const overallSpoon = parseInt(a[2]);
+  const done = parseInt(a[3]);
+  const name = a[4];
+  const spoonsRaw = a.slice(5,a.length);
   let spoonsProcessed = [];
   for (let i = 0; i < spoonsRaw.length; i++)
   {
-    spoonsProcessed.push([homeSpoonTypes[i], reverseSpoon(parseInt(spoonsRaw[i]))]);
+    spoonsProcessed.push([homeSpoonTypes[i], parseInt(spoonsRaw[i])]);
   }
-  const taskObject = buildTaskData(overallSpoon, done, name, spoonsProcessed);
+  const taskObject = buildTaskData(points, overallSpoon, done, name, spoonsProcessed);
   const taskID = assignTaskID();
   if (a[0] === "t")
   {
@@ -987,11 +992,12 @@ function initialiseTaskData()
 }
 
 // builds data for a specific task
-function buildTaskData(difficulty, done, name, spoons)
+function buildTaskData(points, difficulty, done, name, spoons)
 {
   const taskData = { };
   taskData.name = name;
   taskData.difficulty = difficulty;
+  taskData.points = points;
   taskData.done = done;
   taskData.spoons = buildSpoonData(spoons);
   return taskData;
@@ -1005,7 +1011,7 @@ function buildSpoonData(a)
     {
       let spoonType = a[i][0];
       let spoonVal = a[i][1];
-      spoonData[spoonType] = parseSpoon(spoonVal);
+      spoonData[spoonType] = spoonVal;
     }
   return spoonData;
 }
@@ -1039,36 +1045,21 @@ function getNewTaskData(row)
   const rowType = row.attr("class");
   const kids = row.children();
   // set an overall difficulty for the task
-	const spoon = kids.filter(".spoon");
-	let spoonValList = [];
-	for (let i = 0; i < spoon.length; i++) {
-		let spoonForm = $(spoon[i]).children();
-		let spoonVal = $(spoonForm[1]).val();
-		spoonValList.push(parseSpoon(spoonVal));
-	}
-	const spoonTotal = sumList(spoonValList);
-	const spoonCost = parseSpoon((parseSpoonCost(spoonTotal,spoonValList)));
-	let spoonCostSpan;
-	// if this is an edited task, check if the task is completed
-  const doneBox = $(kids[1]);
-  let done;
-  if ($(doneBox).children().length != 0) { // we're editing a row, and there's a checkbox to test
-    let doneCheck = $($(doneBox).children()[1]).prop("checked");
-    if (doneCheck)
-    {
-      done = 1;
-    }
-    else {
-      done = 0;
-    }
-  }
-  else {
-    done = 0;
-  }
+	const spoon = getSpoonBoxes(row);
+  const spoonCosts = getSpoonList(row);
+  const spoonValList = getSpoonValList(spoonCosts);
+	const spoonTotal = assignPoints(spoonValList);
+	const spoonCost = parseSpoon((parseSpoonCost(spoonTotal, spoonValList)));
+	// check if the task is completed
+  const doneBox = getDoneBox(row);
+  const done = getDoneValue(doneBox);
   // add the task name
 	const taskNameBox = getNameBox(row);
 	const grandkids = taskNameBox.children();
   let taskNameInput;
+  // wtf am I doing here
+  // oh this is because I don't have any stupid classes on my stupid spans
+  // fine, fix later
   if (grandkids.length == 2)
   {
     taskNameInput = $(grandkids[1]);
@@ -1078,51 +1069,7 @@ function getNewTaskData(row)
     taskNameInput = $(grandkids[2]);
   }
 	const taskName = taskNameInput.val();
-	// spoon counts
-  let spoonCosts = [];
-  if (rowType == "newtask")
-  {
-	  for (let j = 0; j < spoon.length; j++)
-    {
-		  let spoonForm = $(spoon[j]).children();
-      let spoonType = $(spoonForm[1]).attr("class");
-		  let spoonVal;
-		  if ($(spoonForm[1]).val() == "blank")
-      {
-			  spoonVal = "none";
-		  }
-      else
-      {
-			  spoonVal = $(spoonForm[1]).val();
-		  }
-      spoonCosts.push([spoonType, spoonVal]);
-	  }
-  }
-  else if (rowType == "task")
-  {
-    for (let k = 0; k < spoon.length; k++)
-    {
-      let spoonBox = $(spoon[k]);
-      let spoonType = spoonBox.attr("class").split(" ")[1];
-      let spoonVal;
-      let spoonForm = $(spoonBox.children()[1]);
-      if (spoonForm.val() == "blank")
-      {
-        spoonVal = "none";
-      }
-      else
-      {
-        spoonVal = spoonForm.val();
-      }
-      spoonCosts.push([spoonType, spoonVal]);
-    }
-  }
-  else
-  {
-    developerError("getNewTaskData() called on invalid row type");
-    return;
-  }
-  return [spoonCost,done,taskName,spoonCosts];
+  return [spoonTotal, spoonCost,done,taskName,spoonCosts];
 }
 
 // gets task data from the tasklist
@@ -1190,19 +1137,17 @@ function stringifyTaskData(s, task)
   const spoonTypes = $("body").data("spoonTypes");
   if (s === "tasklist")
   {
-    // stuff
     rowData = "t";
   }
   else if (s === "archivelist")
   {
-    // more stuff
     rowData = "a";
   }
   else
   {
     developerError("stringifyTaskData() called with invalid task type");
   }
-  rowData = rowData.concat(",", task.difficulty, ",", task.done, ",", task.name);
+  rowData = rowData.concat(",", task.points, ",", task.difficulty, ",", task.done, ",", task.name);
   for (let i = 0; i < spoonTypes.length; i++)
   {
     rowData = rowData.concat(",", task.spoons[spoonTypes[i]]);
@@ -1247,19 +1192,23 @@ function validateTaskList(a)
 function validateTask(a)
 {
   let v = true;
-  if (validateTaskType(a[0]) === false)
+  if (validateTaskType(a[0]) === false) // task type
   {
     v = false;
   }
-  if (validateSpoon(a[1]) === false)
+  if (validatePoints(a[1]) === false) // points value
+  {
+    v = false; 
+  }
+  if (validateSpoon(a[2]) === false) // task difficulty
   {
       v = false;
   }
-  if (validateDone(a[2]) === false)
+  if (validateDone(a[3]) === false) // done
   {
     v = false;
   }
-  for (let i = 4; i < a.length; i++)
+  for (let i = 5; i < a.length; i++) // spoon values
   {
     let thisSpoon = validateSpoon(a[i]);
     if (thisSpoon === false)
@@ -1282,6 +1231,24 @@ function validateTaskType(s)
     return true;
   }
   return false;
+}
+
+// validates a points value, which should be a digit between 0 and 40
+function validatePoints(pts)
+{
+  const int = parseInt(pts);
+  if (isNaN(int))
+  {
+    return false;
+  }
+  else if (int >= 0 && int <= 40)
+  {
+    return int;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 // validates a spoon value, which should be a digit between 0 and 4
@@ -1765,6 +1732,69 @@ function getDifficultyBox(row)
 function getNameBox(row)
 {
   return $(row.children().filter(".tasknamebox")[0])
+}
+
+function getDoneBox(row)
+{
+  return $(row.children().filter(".donebox"));
+}
+
+function getDoneValue(box)
+{
+  let done;
+  if (box.children().length != 0) { // we're editing a row, and there's a checkbox to test
+    let doneCheck = $(box.children()[1]).prop("checked");
+    if (doneCheck)
+    {
+      done = 1;
+    }
+    else {
+      done = 0;
+    }
+  }
+  else {
+    done = 0;
+  }
+  return done;
+}
+
+// returns the list of spoon boxes
+function getSpoonBoxes(row)
+{
+  return $(row.children().filter(".spoon"));
+}
+
+function getSpoonList(row)
+{
+  const spoonBoxes = getSpoonBoxes(row);
+  let spoonValList = [];
+	for (let i = 0; i < spoonBoxes.length; i++) {
+    let spoonType = $(spoonBoxes[i]).attr("class").split(" ")[1];
+		let spoonForm = $(spoonBoxes[i]).children();
+		let spoonVal = $(spoonForm[1]).val();
+		spoonValList.push([spoonType, parseSpoon(spoonVal)]);
+	}
+  return spoonValList;
+}
+
+function getSpoonValList(l)
+{
+  let spoonVals = []
+  for (let i = 0; i < l.length; i++)
+  {
+    spoonVals.push(l[i][1]);
+  }
+  return spoonVals;
+}
+
+function assignPoints(l)
+{
+  let points = 0;
+  for (let i = 0; i < l.length; i++)
+  {
+    points += l[i];
+  }
+  return points;
 }
 
 // removes task from the DOM
@@ -2427,7 +2457,7 @@ function makeNewTaskDifficulty()
 
 function makeNewTaskDone()
 {
-  const cell = makeTableCell("done");
+  const cell = makeTableCell("donebox");
   return cell;
 }
 
