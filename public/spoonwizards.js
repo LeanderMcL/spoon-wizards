@@ -23,6 +23,7 @@ $(document).ready(
   function()
   {
 	  const body = $("body");
+    const width = screen.width;
     const taskData = initialiseTaskData();
     // add basic data to the body of the page
 	  body.data( 
@@ -36,12 +37,9 @@ $(document).ready(
       }
     );
     // build the page
-    buildDevTools();
-    buildSettings();
-    buildTitle();
-    buildOptions();
-    buildViews();
-	  buildTaskList();
+    body.append(buildSettings(), buildHeader(), buildOptions(), buildViews());
+    $("#header").width = width;
+    buildTaskList();
     buildArchive();
 	  const table = $("#tasklist");
 	  $(".savenewtask").click(
@@ -82,13 +80,22 @@ const testTask = { name: "test task",
 
 // -- SETUP --
 
+// build up our header
+function buildHeader(width)
+{
+  const headerDiv = $("<div></div>");
+  headerDiv.attr("id", "header");
+  headerDiv.append(buildTitle(), buildDevTools(width));
+  return headerDiv;
+}
+
 // build a dev tools paragraph
 // so far I just want to log task data to the console whenever I want
-function buildDevTools()
+function buildDevTools(width)
 {
-  const body = $("body");
   const devToolsDiv = $("<div></div>");
-  devToolsDiv.addClass("dev-tools");
+  devToolsDiv.attr("id", "dev-tools");
+  devToolsDiv.addClass("sub-head");
   const heading = $("<h3>Developer Tools</h3>");
   const button = makeButton("Log Task Data");
   button.click(function() {
@@ -96,7 +103,7 @@ function buildDevTools()
   });
   devToolsDiv.append(heading);
   devToolsDiv.append(button);
-  body.append(devToolsDiv);
+  return devToolsDiv;
 }
 
 // builds the settings paragraph
@@ -105,7 +112,9 @@ function buildDevTools()
 // this should be fixed later
 function buildSettings()
 {
-  const body = $("body");
+  const settingsDiv = $("<div></div>");
+  settingsDiv.attr("id", "settings");
+  settingsDiv.addClass("sub-head");
   const para = $("<p></p>");
   const container = makeSpan();
   const textSetting = makeSpan();
@@ -129,23 +138,24 @@ function buildSettings()
   container.append(textSetting);
   container.append(" ", emojiLink);
   para.append(container);
-  body.append(para);
+  settingsDiv.append(para);
+  return settingsDiv;
 };
 
 // builds the title of the website
 function buildTitle()
 {
-  const body = $("body");
   const title = $("<h1></h1>");
   title.text("Spoon Wizards");
-  body.append(title);
+  return title;
 }
 
 // builds our options
 // currently: the ability to import and export tasks
 function buildOptions()
 {
-  const body = $("body");
+  const optionsDiv = $("<div></div>");
+  optionsDiv.attr("id", "options");
   const para = $("<p></p>");
   const container = makeSpan();
   const importButton = makeButton("Import");
@@ -171,13 +181,15 @@ function buildOptions()
   container.append(exportButton);
   // still need to make these buttons do anything at all, so I guess we'll start with the Export button
   para.append(container);
-  body.append(para);
+  optionsDiv.append(para);
+  return optionsDiv;
 };
 
 // builds our different views for tasks
 function buildViews()
 {
-  const body = $("body");
+  const viewsDiv = $("<div></div>");
+  viewsDiv.attr("id", "views");
   const para = $("<p></p>");
   const container = makeSpan();
   const taskSetting = makeSpan();
@@ -200,7 +212,8 @@ function buildViews()
   container.append(taskSetting);
   container.append(" ", archiveLink);
   para.append(container);
-  body.append(para);
+  viewsDiv.append(para);
+  return viewsDiv;
 }
 
 // builds the task list table
@@ -220,7 +233,8 @@ function buildTaskList()
 	// make the new task row and append to the table
 	const newTaskRow = makeNewTaskRow(spoonTypes,spoonDifficulties);
 	taskList.append(newTaskRow);
-	setSpoonWidths(taskList);
+  const spoons = $(newTaskRow.children().filter(".spoon"));
+	spoons.outerWidth(setSpoonWidths(taskList));
 }
 
 // builds the archive table
@@ -237,7 +251,10 @@ function buildArchive()
   body.append(archive);
   const headerRow = makeTaskHeaderRow("archive", spoonTypes); // will probably need header emojis later
   archive.append(headerRow);
-  setSpoonWidths(archive);
+  const spoons = $(headerRow.children().filter(".spoonhead"));
+  console.log(spoons);
+  const taskList = $("#tasklist");
+  spoons.outerWidth(setSpoonWidths(taskList));
   archive.hide();
 }
 
@@ -371,7 +388,6 @@ function updateTask(row, task)
   task.difficulty = difficulty;
   // recalculate and update points
   const points = assignPoints(spoonValList);
-  console.log(points);
   task.points = points;
   // update the task difficulty box
   const difficultyBox = getDifficultyBox(row);
@@ -2539,7 +2555,8 @@ function setSpoonWidths(table)
   const cells = $(row.children());
   const spoons = cells.filter(".spoonhead");
   const width = spoons.outerWidth();
-  spoons.outerWidth(width);
+  console.log(width);
+  return width;
 }
 
 // makes an input box
