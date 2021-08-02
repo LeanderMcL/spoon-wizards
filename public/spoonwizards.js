@@ -36,6 +36,7 @@ $(document).ready(
       }
     );
     // build the page
+    buildDevTools();
     buildSettings();
     buildTitle();
     buildOptions();
@@ -80,6 +81,23 @@ const testTask = { name: "test task",
                      }
 
 // -- SETUP --
+
+// build a dev tools paragraph
+// so far I just want to log task data to the console whenever I want
+function buildDevTools()
+{
+  const body = $("body");
+  const devToolsDiv = $("<div></div>");
+  devToolsDiv.addClass("dev-tools");
+  const heading = $("<h3>Developer Tools</h3>");
+  const button = makeButton("Log Task Data");
+  button.click(function() {
+    logTaskData();
+  });
+  devToolsDiv.append(heading);
+  devToolsDiv.append(button);
+  body.append(devToolsDiv);
+}
 
 // builds the settings paragraph
 // currently: the ability to switch between text and emoji mode
